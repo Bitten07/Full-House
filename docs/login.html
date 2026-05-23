@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mesa de rpg — Entrar</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold:      #d4af37;
+  --gold-dim:  rgba(212,175,55,.14);
+  --gold-bd:   rgba(212,175,55,.25);
+  --gold-text: #e8d5a3;
+  --ink:       #0a0806;
+  --ink2:      #111008;
+  --ink3:      #1a1710;
+  --text:      #cfc3a4;
+  --text-dim:  #5a5040;
+  --red:       #c0392b;
+  --red-dim:   rgba(192,57,43,.15);
+  --green:     #16a34a;
+  --green-dim: rgba(22,163,74,.12);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  overflow: hidden;
+}
+
+/* BG animado */
+#bg-canvas {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+}
+
+/* CONTAINER CENTRAL */
+#auth-wrap {
+  position: relative; z-index: 1;
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+
+#auth-card {
+  width: 100%; max-width: 420px;
+  background: rgba(10,8,6,.92);
+  border: 1px solid var(--gold-bd);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(212,175,55,.06);
+  backdrop-filter: blur(16px);
+  animation: cardIn .4s ease;
+}
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(20px) scale(.97); }
+  to   { opacity:1; transform:translateY(0)    scale(1);   }
+}
+
+/* LOGO */
+#logo-area {
+  padding: 32px 32px 24px;
+  text-align: center;
+  border-bottom: 1px solid var(--gold-bd);
+  background: rgba(212,175,55,.03);
+}
+#logo-icon { font-size: 48px; margin-bottom: 10px; line-height: 1; }
+#logo-title {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--gold);
+  text-shadow: 0 0 20px rgba(212,175,55,.4);
+  margin-bottom: 5px;
+}
+#logo-sub {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+/* ABAS */
+#tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--gold-bd);
+}
+.auth-tab {
+  flex: 1;
+  background: none; border: none;
+  font-family: 'Cinzel', serif;
+  font-size: 9px; letter-spacing: 2.5px;
+  color: var(--text-dim);
+  padding: 13px 10px 11px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all .2s;
+}
+.auth-tab:hover { color: var(--gold-text); }
+.auth-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* FORMS */
+.auth-form { padding: 24px 28px 20px; display: flex; flex-direction: column; gap: 14px; }
+.auth-form.hidden { display: none; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-family: 'Cinzel', serif;
+  font-size: 8px; letter-spacing: 2px;
+  color: var(--text-dim); text-transform: uppercase;
+}
+.field input, .field select {
+  background: rgba(0,0,0,.4);
+  border: 1px solid rgba(212,175,55,.2);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  border-radius: 7px;
+  padding: 9px 13px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212,175,55,.1);
+}
+.field input::placeholder { color: var(--text-dim); opacity: .5; }
+.field select option { background: var(--ink2); }
+
+/* Linha com 2 campos */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Role badge */
+.role-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.role-card {
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--gold-bd);
+  border-radius: 8px;
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+}
+.role-card:hover { background: var(--gold-dim); border-color: var(--gold); }
+.role-card.selected {
+  background: var(--gold-dim);
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(212,175,55,.2);
+}
+.role-icon { font-size: 26px; margin-bottom: 5px; }
+.role-name {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; letter-spacing: 1.5px;
+  color: var(--gold-text);
+}
+.role-desc { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+/* Divider */
+.auth-divider {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text-dim); font-size: 11px;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--gold-bd);
+}
+
+/* Botão principal */
+.btn-auth {
+  background: rgba(212,175,55,.14);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: 'Cinzel', serif;
+  font-size: 10px; letter-spacing: 2.5px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .2s;
+  width: 100%;
+  margin-top: 4px;
+}
+.btn-auth:hover {
+  background: rgba(212,175,55,.24);
+  box-shadow: 0 0 18px rgba(212,175,55,.25);
+}
+.btn-auth:active { transform: scale(.98); }
+
+/* Botão secundário (sem conta) */
+.btn-guest {
+  background: none;
+  border: 1px solid var(--gold-bd);
+  color: var(--text-dim);
+  font-family: 'Cinzel', serif;
+  font-size: 9px; letter-spacing: 1.5px;
+  padding: 9px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all .15s;
+  width: 100%;
+  text-align: center;
+}
+.btn-guest:hover { border-color: var(--gold-bd); color: var(--text); }
+
+/* Mensagem erro/sucesso */
+.auth-msg {
+  font-size: 12px; text-align: center;
+  padding: 8px 12px; border-radius: 6px;
+  display: none; border: 1px solid;
+}
+.auth-msg.error  { color: #e07070; border-color: var(--red);   background: var(--red-dim);   display: block; }
+.auth-msg.success{ color: #5ebd8a; border-color: var(--green); background: var(--green-dim); display: block; }
+
+/* Footer do card */
+#auth-footer {
+  padding: 14px 28px;
+  border-top: 1px solid var(--gold-bd);
+  background: rgba(0,0,0,.2);
+  text-align: center;
+}
+#auth-footer p {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* Senha toggle */
+.input-wrap { position: relative; }
+.input-wrap input { padding-right: 40px; }
+.toggle-pw {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 14px; padding: 2px;
+  transition: color .15s;
+}
+.toggle-pw:hover { color: var(--gold); }
+
+/* Avatar upload no cadastro */
+.avatar-pick {
+  display: flex; align-items: center; gap: 12px;
+}
+.avatar-circle {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--gold-bd);
+  background: rgba(0,0,0,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; cursor: pointer; flex-shrink: 0;
+  transition: border-color .15s; overflow: hidden;
+}
+.avatar-circle:hover { border-color: var(--gold); }
+.avatar-circle img { width:100%;height:100%;object-fit:cover;border-radius:50%; }
+.avatar-hint { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+/* Mesas salvas (pós-login) */
+#mesas-panel { display: none; padding: 0 28px 20px; flex-direction: column; gap: 8px; }
+#mesas-panel.visible { display: flex; }
+.mesa-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(0,0,0,.3); border: 1px solid var(--gold-bd);
+  border-radius: 8px; padding: 10px 12px; cursor: pointer;
+  transition: all .2s;
+}
+.mesa-item:hover { background: var(--gold-dim); border-color: var(--gold); }
+.mesa-emoji { font-size: 22px; flex-shrink: 0; }
+.mesa-info { flex: 1; min-width: 0; }
+.mesa-nome {
+  font-family: 'Cinzel', serif; font-size: 11px;
+  letter-spacing: 1px; color: var(--gold-text);
+}
+.mesa-meta { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.mesa-badge {
+  font-family: 'Cinzel', serif; font-size: 7px; letter-spacing: 1px;
+  padding: 2px 6px; border-radius: 8px; border: 1px solid;
+}
+.badge-mestre { color: var(--gold); border-color: var(--gold); background: var(--gold-dim); }
+.badge-player { color: #7eb3e8; border-color: #3b82c4; background: rgba(59,130,196,.12); }
+</style>
+</head>
+<body>
+
+<!-- BG animado com partículas douradas -->
+<canvas id="bg-canvas"></canvas>
+
+<div id="auth-wrap">
+  <div id="auth-card">
+
+    <!-- LOGO -->
+    <div id="logo-area">
+      <div id="logo-icon">⚔️</div>
+      <div id="logo-title">FULL HOUSE RPG</div>
+      <div id="logo-sub">Forjado em ecos &amp; de uma ruptura</div>
+    </div>
+
+    <!-- ABAS -->
+    <div id="tab-bar">
+      <button class="auth-tab active" id="tab-login"    onclick="mudarAba('login')">ENTRAR</button>
+      <button class="auth-tab"        id="tab-cadastro" onclick="mudarAba('cadastro')">CRIAR CONTA</button>
+    </div>
+
+    <!-- FORM LOGIN -->
+    <div class="auth-form" id="form-login">
+      <div id="msg-login" class="auth-msg"></div>
+      <div class="field">
+        <label>Email ou nome de usuário</label>
+        <input type="text" id="login-user" placeholder="seunome@email.com" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <div class="input-wrap">
+          <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password">
+          <button class="toggle-pw" onclick="toggleSenha('login-senha',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn-auth" onclick="fazerLogin()">⚔️ ENTRAR NA MESA</button>
+      <div class="auth-divider">ou</div>
+      <button class="btn-guest" onclick="entrarVisitante()">🎭 Entrar como Visitante</button>
+    </div>
+
+    <!-- FORM CADASTRO -->
+    <div class="auth-form hidden" id="form-cadastro">
+      <div id="msg-cadastro" class="auth-msg"></div>
+
+      <!-- Avatar + nome -->
+      <div class="avatar-pick">
+        <div class="avatar-circle" id="avatar-pick-btn" onclick="document.getElementById('avatar-file').click()" title="Escolher foto">
+          <span id="avatar-emoji">🧙</span>
+        </div>
+        <div class="avatar-hint">Clique para escolher<br>uma foto de perfil</div>
+        <input type="file" id="avatar-file" accept="image/*" style="display:none">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Nome</label>
+          <input type="text" id="cad-nome" placeholder="Seu nome" maxlength="30">
+        </div>
+        <div class="field">
+          <label>Usuário</label>
+          <input type="text" id="cad-user" placeholder="@usuario" maxlength="20">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="cad-email" placeholder="seu@email.com">
+      </div>
+
+      <div class="field">
+        <label>Senha</label>
+        <div class="input-wrap">
+          <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres">
+          <button class="toggle-pw" onclick="toggleSenha('cad-senha',this)">👁</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Seu papel preferido</label>
+        <div class="role-grid">
+          <div class="role-card selected" data-role="mestre" onclick="selecionarRole('mestre')">
+            <div class="role-icon">👑</div>
+            <div class="role-name">MESTRE</div>
+            <div class="role-desc">Narro aventuras</div>
+          </div>
+          <div class="role-card" data-role="player" onclick="selecionarRole('player')">
+            <div class="role-icon">⚔️</div>
+            <div class="role-name">JOGADOR</div>
+            <div class="role-desc">Vivo aventuras</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-auth" onclick="fazerCadastro()">✨ CRIAR MINHA CONTA</button>
+    </div>
+
+    <!-- MESAS (pós-login) -->
+    <div id="mesas-panel">
+      <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;padding:0 4px">
+        SUAS MESAS
+      </div>
+      <div id="mesas-lista"></div>
+      <button class="btn-auth" style="margin-top:4px" onclick="novaMesa()">＋ CRIAR NOVA MESA</button>
+      <button class="btn-guest" onclick="entrarPorCodigo()">🔑 Entrar com código de convite</button>
+    </div>
+
+    <!-- FOOTER -->
+    <div id="auth-footer">
+      <p id="footer-quote">"A aventura começa com um único passo."</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// BG CANVAS (partículas)
+// ═══════════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  for (let i = 0; i < 55; i++) {
+    particles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.3,
+      vx: (Math.random() - .5) * .25,
+      vy: (Math.random() - .5) * .25,
+      a: Math.random(),
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    // fundo gradiente
+    const g = ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.7);
+    g.addColorStop(0, 'rgba(26,21,12,.98)');
+    g.addColorStop(1, 'rgba(8,6,4,1)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    // partículas
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      p.a += .005; if (p.a > 1) p.a = 0;
+      const alpha = Math.sin(p.a * Math.PI) * .5;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(212,175,55,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ═══════════════════════════════════════════════
+// FRASES FLAVOR
+// ═══════════════════════════════════════════════
+const FRASES = [
+  '"A aventura começa com um único passo."',
+  '"Todo herói já foi um dia um iniciante."',
+  '"Os dados decidem o destino, mas o mestre escreve a história."',
+  '"Em Arton, toda jornada tem um preço."',
+  '"O mal nunca dorme — e os heróis tampouco."',
+  '"Uma boa história é melhor que qualquer tesouro."',
+];
+document.getElementById('footer-quote').textContent = FRASES[Math.floor(Math.random()*FRASES.length)];
+
+// ═══════════════════════════════════════════════
+// ABAS
+// ═══════════════════════════════════════════════
+function mudarAba(aba) {
+  document.getElementById('form-login').classList.toggle('hidden', aba !== 'login');
+  document.getElementById('form-cadastro').classList.toggle('hidden', aba !== 'cadastro');
+  document.getElementById('tab-login').classList.toggle('active', aba === 'login');
+  document.getElementById('tab-cadastro').classList.toggle('active', aba === 'cadastro');
+  limparMsgs();
+}
+
+function limparMsgs() {
+  ['msg-login','msg-cadastro'].forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'auth-msg'; el.textContent = '';
+  });
+}
+
+function mostrarMsg(id, tipo, texto) {
+  const el = document.getElementById(id);
+  el.className = 'auth-msg ' + tipo;
+  el.textContent = texto;
+}
+
+// ═══════════════════════════════════════════════
+// SENHA TOGGLE
+// ═══════════════════════════════════════════════
+function toggleSenha(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁';
+}
+
+// ═══════════════════════════════════════════════
+// ROLE
+// ═══════════════════════════════════════════════
+let roleAtual = 'mestre';
+function selecionarRole(role) {
+  roleAtual = role;
+  document.querySelectorAll('.role-card').forEach(el => {
+    el.classList.toggle('selected', el.dataset.role === role);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// AVATAR
+// ═══════════════════════════════════════════════
+let avatarDataUrl = null;
+document.getElementById('avatar-file').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    avatarDataUrl = ev.target.result;
+    const btn = document.getElementById('avatar-pick-btn');
+    btn.innerHTML = `<img src="${avatarDataUrl}" alt="avatar">`;
+  };
+  reader.readAsDataURL(file);
+});
+
+// ═══════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════
+function fazerLogin() {
+  const user  = document.getElementById('login-user').value.trim();
+  const senha = document.getElementById('login-senha').value;
+
+  if (!user || !senha) { mostrarMsg('msg-login','error','Preencha todos os campos.'); return; }
+
+  // Busca usuário no localStorage
+  const contas = JSON.parse(localStorage.getItem('rpgContas') || '[]');
+  const conta  = contas.find(c => (c.email === user || c.usuario === user) && c.senha === btoa(senha));
+
+  if (!conta) { mostrarMsg('msg-login','error','Usuário ou senha incorretos.'); return; }
+
+  // Salva sessão
+  localStorage.setItem('rpgSessao', JSON.stringify({ id: conta.id, nome: conta.nome, role: conta.role, avatar: conta.avatar }));
+  mostrarMsg('msg-login','success','✅ Bem-vindo de volta, ' + conta.nome + '!');
+  setTimeout(() => entrarNaMesa(conta), 900);
+}
+
+// ═══════════════════════════════════════════════
+// CADASTRO
+// ═══════════════════════════════════════════════
+function fazerCadastro() {
+  const nome  = document.getElementById('cad-nome').value.trim();
+  const user  = document.getElementById('cad-user').value.trim().replace('@','');
+  const email = document.getElementById('cad-email').value.trim();
+  const senha = document.getElementById('cad-senha').value;
+
+  if (!nome || !user || !email || !senha) { mostrarMsg('msg-cadastro','error','Preencha todos os campos.'); return; }
+  if (senha.length < 6) { mostrarMsg('msg-cadastro','error','Senha muito curta (mín. 6 caracteres).'); return; }
+  if (!/\S+@\S+\.\S+/.test(email)) { mostrarMsg('msg-cadastro','error','Email inválido.'); return; }
+
+  const contas = JSON.parse(localStorage.getItem('rpgContas') || '[]');
+  if (contas.find(c => c.email === email)) { mostrarMsg('msg-cadastro','error','Este email já está cadastrado.'); return; }
+  if (contas.find(c => c.usuario === user)) { mostrarMsg('msg-cadastro','error','Nome de usuário já existe.'); return; }
+
+  const novaConta = {
+    id:      'u' + Date.now(),
+    nome, usuario: user, email,
+    senha:   btoa(senha),
+    role:    roleAtual,
+    avatar:  avatarDataUrl || null,
+    mesas:   [],
+    criadoEm: Date.now(),
+  };
+  contas.push(novaConta);
+  localStorage.setItem('rpgContas', JSON.stringify(contas));
+  localStorage.setItem('rpgSessao', JSON.stringify({ id: novaConta.id, nome, role: roleAtual, avatar: avatarDataUrl }));
+  mostrarMsg('msg-cadastro','success','✅ Conta criada! Bem-vindo, ' + nome + '!');
+  setTimeout(() => entrarNaMesa(novaConta), 900);
+}
+
+// ═══════════════════════════════════════════════
+// VISITANTE
+// ═══════════════════════════════════════════════
+function entrarVisitante() {
+  const nome = prompt('Como quer ser chamado?')?.trim() || 'Aventureiro';
+  localStorage.setItem('rpgSessao', JSON.stringify({ id: 'guest', nome, role: 'player', avatar: null, visitante: true }));
+  window.location.href = 'index.html';
+}
+
+// ═══════════════════════════════════════════════
+// ENTRAR NA MESA
+// ═══════════════════════════════════════════════
+function entrarNaMesa(conta) {
+  // Mostra painel de mesas se houver mesas salvas
+  const mesas = conta.mesas || [];
+  if (mesas.length > 0) {
+    document.getElementById('form-login').classList.add('hidden');
+    document.getElementById('tab-bar').style.display = 'none';
+    const panel = document.getElementById('mesas-panel');
+    panel.classList.add('visible');
+    const lista = document.getElementById('mesas-lista');
+    lista.innerHTML = mesas.map(m => `
+      <div class="mesa-item" onclick="abrirMesa('${m.id}')">
+        <span class="mesa-emoji">${m.emoji || '🗺️'}</span>
+        <div class="mesa-info">
+          <div class="mesa-nome">${m.nome}</div>
+          <div class="mesa-meta">${m.jogadores || 0} jogadores · ${m.sistema || 'T20'}</div>
+        </div>
+        <span class="mesa-badge ${conta.role==='mestre'?'badge-mestre':'badge-player'}">${conta.role==='mestre'?'MESTRE':'JOGADOR'}</span>
+      </div>
+    `).join('');
+  } else {
+    window.location.href = 'index.html';
+  }
+}
+
+function abrirMesa(id) { window.location.href = 'index.html?mesa=' + id; }
+function novaMesa() {
+  const nome = prompt('Nome da nova mesa:')?.trim();
+  if (!nome) return;
+  const sessao = JSON.parse(localStorage.getItem('rpgSessao') || '{}');
+  const contas = JSON.parse(localStorage.getItem('rpgContas') || '[]');
+  const conta  = contas.find(c => c.id === sessao.id);
+  if (!conta) { window.location.href = 'index.html'; return; }
+  const mesa = { id: 'm'+Date.now(), nome, emoji:'🗺️', sistema:'T20', jogadores:1, criadaEm:Date.now() };
+  conta.mesas = conta.mesas || [];
+  conta.mesas.push(mesa);
+  localStorage.setItem('rpgContas', JSON.stringify(contas));
+  window.location.href = 'index.html?mesa=' + mesa.id;
+}
+function entrarPorCodigo() {
+  const code = prompt('Digite o código de convite da mesa:')?.trim();
+  if (code) window.location.href = 'index.html?codigo=' + code;
+}
+
+// ═══════════════════════════════════════════════
+// AUTO-LOGIN se já tem sessão
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const sessao = localStorage.getItem('rpgSessao');
+  if (sessao) {
+    try {
+      const s = JSON.parse(sessao);
+      // Mostra botão de continuar sessão
+      const footer = document.getElementById('auth-footer');
+      footer.innerHTML = `
+        <p style="margin-bottom:8px">Sessão ativa: <strong style="color:var(--gold)">${s.nome}</strong></p>
+        <button class="btn-auth" style="font-size:9px;padding:8px" onclick="window.location.href='index.html'">
+          ▶ CONTINUAR COMO ${s.nome.toUpperCase()}
+        </button>
+        <button class="btn-guest" style="margin-top:6px;font-size:9px" onclick="localStorage.removeItem('rpgSessao');location.reload()">
+          Trocar de conta
+        </button>`;
+    } catch(e) {}
+  }
+
+  // Enter nos campos
+  ['login-user','login-senha'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => { if(e.key==='Enter') fazerLogin(); });
+  });
+  ['cad-nome','cad-user','cad-email','cad-senha'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => { if(e.key==='Enter') fazerCadastro(); });
+  });
+});
+</script>
+</body>
+</html>

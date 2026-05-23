@@ -1,3 +1,18 @@
+// ═══════════════════════════════════════════════
+// TRACKER DE COMBATE
+// ═══════════════════════════════════════════════
+let combateVisivel = false;
+
+function toggleCombate() {
+    combateVisivel = !combateVisivel;
+    const iframe = document.getElementById('combateIframe');
+    if (iframe) {
+        iframe.style.pointerEvents = combateVisivel ? 'auto' : 'none';
+        iframe.style.opacity = combateVisivel ? '1' : '0';
+        iframe.style.transition = 'opacity 0.25s';
+    }
+}
+
 // =============================================================================
 // 1. ESTADO GLOBAL
 // =============================================================================
@@ -161,131 +176,25 @@ function abrirJanela(tipo) {
     titulo.innerText = tipo.toUpperCase();
 
     if (tipo === 'fichas') {
+        // Ficha completa T20 carregada via iframe
         conteudo.innerHTML = `
-            <div class="ficha-scroll-container" style="height: 100%; overflow-y: auto; padding-right: 10px;">
-                <div class="ficha-container" style="display: flex; flex-direction: column; gap: 15px; padding: 10px;">
-                    
-                    <div class="ficha-header ficha-secao" style="display: flex; flex-wrap: wrap; gap: 10px;">
-                        <input type="text" placeholder="Nome do Personagem" id="nome-char" style="flex: 3; min-width: 200px;">
-                        <input type="number" placeholder="Nível" id="nivel-char" value="1" style="flex: 0.5; min-width: 60px;">
-                        <input type="text" placeholder="Raça" style="flex: 1; min-width: 100px;">
-                        <input type="text" placeholder="Classe" style="flex: 1; min-width: 100px;">
-                        <input type="text" placeholder="Divindade" style="flex: 1; min-width: 100px;">
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
-                        <div class="status-box pv" style="background: #741b1b; padding: 10px; border-radius: 5px; text-align: center;">
-                            <span style="font-size: 0.8rem;">PONTOS DE VIDA</span><br>
-                            <input type="number" value="0" style="width: 50px;"> / <input type="number" value="0" style="width: 50px;">
-                        </div>
-                        <div class="status-box pm" style="background: #1b4d74; padding: 10px; border-radius: 5px; text-align: center;">
-                            <span style="font-size: 0.8rem;">PONTOS DE MANA</span><br>
-                            <input type="number" value="0" style="width: 50px;"> / <input type="number" value="0" style="width: 50px;">
-                        </div>
-                        <div class="ficha-secao" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 0.8rem;">🛡️ DEFESA</span>
-                            <input type="number" value="10" style="width: 60px; margin: 0 auto; font-size: 1.2rem; background: none; border: 1px solid #ffd700; color: white; text-align: center;">
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                        <div class="ficha-secao">
-                            <h4 style="margin-bottom:10px; border-bottom:1px solid #555;">Atributos</h4>
-                            <div class="atributo-row"><span>FOR</span><input type="number" id="for-val" value="10" oninput="atualizarMod()"> <small id="for-mod">+0</small></div>
-                            <div class="atributo-row"><span>DES</span><input type="number" id="des-val" value="10" oninput="atualizarMod()"> <small id="des-mod">+0</small></div>
-                            <div class="atributo-row"><span>CON</span><input type="number" id="con-val" value="10" oninput="atualizarMod()"> <small id="con-mod">+0</small></div>
-                            <div class="atributo-row"><span>INT</span><input type="number" id="int-val" value="10" oninput="atualizarMod()"> <small id="int-mod">+0</small></div>
-                            <div class="atributo-row"><span>SAB</span><input type="number" id="sab-val" value="10" oninput="atualizarMod()"> <small id="sab-mod">+0</small></div>
-                            <div class="atributo-row"><span>CAR</span><input type="number" id="car-val" value="10" oninput="atualizarMod()"> <small id="car-mod">+0</small></div>
-                        </div>
-                        <div class="ficha-secao">
-                            <h4 style="margin-bottom:10px; border-bottom:1px solid #555;">Resistências</h4>
-                            <div style="display: flex; flex-direction: column; gap: 10px;">
-                                <button class="nav-button" onclick="rolarPericia('Fortitude', 'fortitude')">🛡️ Fortitude (CON)</button>
-                                <button class="nav-button" onclick="rolarPericia('Reflexos', 'reflexos')">🏃 Reflexos (DES)</button>
-                                <button class="nav-button" onclick="rolarPericia('Vontade', 'vontade')">🧠 Vontade (SAB)</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="ficha-secao">
-                        <h4 style="margin-bottom:10px; border-bottom:1px solid #555;">Ataques</h4>
-                        <table style="width: 100%; font-size: 0.8rem; text-align: left;">
-                            <thead>
-                                <tr>
-                                    <th>Arma/Ataque</th>
-                                    <th>Teste</th>
-                                    <th>Dano</th>
-                                    <th>Crítico</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><input type="text" placeholder="Ex: Espada" style="width: 90%;"></td>
-                                    <td><button class="nav-button" onclick="rolarFormula('1d20', 'Ataque')">⚔️ Atacar</button></td>
-                                    <td><button class="nav-button" onclick="rolarFormula('1d6', 'Dano')">💥 Dano</button></td>
-                                    <td><input type="text" placeholder="19/x2" style="width: 40px;"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="ficha-secao">
-                        <h4 style="margin-bottom:10px; border-bottom:1px solid #555;">Perícias</h4>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem;">
-                            <thead>
-                                <tr style="text-align: left; color: #aaa; border-bottom: 1px solid #444;">
-                                    <th>T</th>
-                                    <th>Perícia</th>
-                                    <th>Atributo</th>
-                                    <th>Outros</th>
-                                    <th>Rolar</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pericias-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            <iframe
+                id="fichaIframe"
+                src="ficha_t20.html"
+                style="width:100%;height:100%;border:none;background:transparent;"
+                title="Ficha de Personagem T20">
+            </iframe>
         `;
-
-        const pericias = [
-            {nome: 'Acrobacia', attr: 'des'}, {nome: 'Adestramento', attr: 'car'}, {nome: 'Atletismo', attr: 'for'},
-            {nome: 'Atuação', attr: 'car'}, {nome: 'Cavalgar', attr: 'des'}, {nome: 'Conhecimento', attr: 'int'},
-            {nome: 'Cura', attr: 'sab'}, {nome: 'Diplomacia', attr: 'car'}, {nome: 'Enganação', attr: 'car'},
-            {nome: 'Fortitude', attr: 'con'}, {nome: 'Furtividade', attr: 'des'}, {nome: 'Guerra', attr: 'int'},
-            {nome: 'Iniciativa', attr: 'des'}, {nome: 'Intimidação', attr: 'car'}, {nome: 'Intuição', attr: 'sab'},
-            {nome: 'Investigação', attr: 'int'}, {nome: 'Jogatina', attr: 'car'}, {nome: 'Ladinagem', attr: 'des'},
-            {nome: 'Luta', attr: 'for'}, {nome: 'Misticismo', attr: 'int'}, {nome: 'Nobreza', attr: 'int'},
-            {nome: 'Ofício', attr: 'int'}, {nome: 'Percepção', attr: 'sab'}, {nome: 'Pilotagem', attr: 'des'},
-            {nome: 'Pontaria', attr: 'des'}, {nome: 'Reflexos', attr: 'des'}, {nome: 'Religião', attr: 'sab'},
-            {nome: 'Sobrevivência', attr: 'sab'}, {nome: 'Vontade', attr: 'sab'}
-        ];
-
-        const tbody = document.getElementById('pericias-body');
-        pericias.forEach(p => {
-            const idLower = p.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ /g, '-');
-            tbody.innerHTML += `
-                <tr style="border-bottom: 1px solid #222;">
-                    <td><input type="checkbox" id="treino-${idLower}"></td>
-                    <td title="Clique no dado para rolar">${p.nome}</td>
-                    <td>
-                        <select id="attr-select-${idLower}" style="background:#111; color:white; border:none; font-size:0.7rem;">
-                            <option value="for" ${p.attr === 'for' ? 'selected' : ''}>FOR</option>
-                            <option value="des" ${p.attr === 'des' ? 'selected' : ''}>DES</option>
-                            <option value="con" ${p.attr === 'con' ? 'selected' : ''}>CON</option>
-                            <option value="int" ${p.attr === 'int' ? 'selected' : ''}>INT</option>
-                            <option value="sab" ${p.attr === 'sab' ? 'selected' : ''}>SAB</option>
-                            <option value="car" ${p.attr === 'car' ? 'selected' : ''}>CAR</option>
-                        </select>
-                    </td>
-                    <td><input type="number" id="outros-${idLower}" value="0" style="width:30px; background:none; border:1px solid #444; color:white;"></td>
-                    <td><button class="nav-button btn-rolar-pericia" onclick="rolarPericia('${p.nome}', '${idLower}')">🎲</button></td>
-                </tr>
-            `;
+        // Injeta funções do chat principal no iframe após carregamento
+        const iframe = document.getElementById('fichaIframe');
+        iframe.addEventListener('load', () => {
+            try {
+                const iw = iframe.contentWindow;
+                iw.adicionarMensagemChat = adicionarMensagemChat;
+                iw.animarDado3D = animarDado3D;
+                iw.toggleChat = toggleChat;
+            } catch(e) { /* cross-origin em produção */ }
         });
-
-        atualizarMod();
 
     } else if (tipo === 'dados') {
         conteudo.innerHTML = `
@@ -303,6 +212,21 @@ function abrirJanela(tipo) {
                 </div>
                 <p style="color:#aaa; font-size:0.75rem; margin-top:16px;">💡 Digite fórmulas no chat: <strong style="color:#ffd700">2d6+3</strong>, <strong style="color:#ffd700">1d20</strong>, <strong style="color:#ffd700">3d4-1</strong></p>
             </div>
+        `;
+    } else if (tipo === 'docs') {
+        titulo.innerText = '📖 DOCUMENTOS & LORE';
+        el.style.width  = Math.min(window.innerWidth  * 0.88, 960) + 'px';
+        el.style.height = Math.min(window.innerHeight * 0.88, 640) + 'px';
+        el.style.top = '50%';
+        el.style.left = '50%';
+        el.style.transform = 'translate(-50%, -50%)';
+        conteudo.innerHTML = `
+            <iframe
+                id="docsIframe"
+                src="docs.html"
+                style="width:100%;height:100%;border:none;background:transparent;"
+                title="Documentos e Lore">
+            </iframe>
         `;
     }
 }
