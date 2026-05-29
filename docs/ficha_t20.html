@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha T20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold:        #d4af37;
+  --gold-dim:    #a07c1a;
+  --gold-glow:   rgba(212,175,55,.18);
+  --gold-border: rgba(212,175,55,.22);
+  --gold-text:   #e8d5a3;
+  --ink:         #0c0a08;
+  --ink2:        #141210;
+  --ink3:        #1c1a16;
+  --ink4:        #242018;
+  --text:        #d8cdb0;
+  --text-dim:    #8a7e68;
+  --red:         #c0392b;
+  --red-dim:     rgba(192,57,43,.15);
+  --blue:        #3b82c4;
+  --blue-dim:    rgba(59,130,196,.12);
+  --purple:      #8b5cf6;
+  --purple-dim:  rgba(139,92,246,.12);
+  --green:       #2e7d52;
+  --green-dim:   rgba(46,125,82,.15);
+  --radius:      6px;
+  --font-title:  'Cinzel', serif;
+  --font-body:   'Crimson Pro', serif;
+  --font-flavor: 'IM Fell English', serif;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+/* ── SCROLL CONTAINER ── */
+.ficha-root {
+  width: 100%; height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 10px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-dim) var(--ink2);
+}
+.ficha-root::-webkit-scrollbar { width: 5px; }
+.ficha-root::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+
+/* ── SEÇÃO ── */
+.secao {
+  background: var(--ink2);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.secao-titulo {
+  font-family: var(--font-title);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 6px 10px 5px;
+  background: rgba(212,175,55,.05);
+  border-bottom: 1px solid var(--gold-border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+.secao-titulo::after {
+  content: '▾';
+  margin-left: auto;
+  font-size: 10px;
+  transition: transform .2s;
+}
+.secao.collapsed .secao-titulo::after { transform: rotate(-90deg); }
+.secao-body { padding: 10px; }
+.secao.collapsed .secao-body { display: none; }
+
+/* ── INPUTS ── */
+input[type=text], input[type=number], select, textarea {
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(212,175,55,.18);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  border-radius: 4px;
+  padding: 4px 7px;
+  width: 100%;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold-glow);
+}
+input[type=number] { text-align: center; }
+select { cursor: pointer; }
+select option { background: var(--ink3); }
+textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+input::placeholder, textarea::placeholder { color: var(--text-dim); opacity: .6; }
+
+/* ── LABEL ── */
+label {
+  font-size: 10px;
+  font-family: var(--font-title);
+  letter-spacing: 1.2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 3px;
+}
+
+/* ── GRID UTILS ── */
+.row   { display: flex; gap: 8px; }
+.row > * { flex: 1; }
+.col   { display: flex; flex-direction: column; gap: 8px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+/* ── CAMPO ── */
+.campo { display: flex; flex-direction: column; }
+
+/* ── ATRIBUTOS ── */
+.atributos-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+.attr-box {
+  background: var(--ink3);
+  border: 1px solid var(--gold-border);
+  border-radius: 6px;
+  padding: 6px 4px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+.attr-nome {
+  font-family: var(--font-title);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--gold);
+}
+.attr-val {
+  width: 44px !important;
+  font-size: 18px !important;
+  font-weight: 600;
+  color: white !important;
+  border-color: rgba(212,175,55,.3) !important;
+  padding: 3px !important;
+}
+.attr-mod {
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: var(--gold-text);
+  min-height: 16px;
+  cursor: pointer;
+  transition: color .15s;
+}
+.attr-mod:hover { color: var(--gold); }
+.attr-mod-label {
+  font-size: 8px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+/* ── STATUS BAR (PV / PE / DEF) ── */
+.status-bars { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.status-bar {
+  background: var(--ink3);
+  border: 1px solid var(--gold-border);
+  border-radius: 6px;
+  padding: 7px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.status-bar-label {
+  font-family: var(--font-title);
+  font-size: 9px;
+  letter-spacing: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.status-bar-values { display: flex; gap: 4px; align-items: center; }
+.status-bar-values input { font-size: 17px !important; font-weight: 600; }
+.status-sep { color: var(--text-dim); font-size: 14px; padding: 0 1px; }
+
+.pv-label  { color: #c0392b; }
+.pe-label  { color: #3b82c4; }
+.def-label { color: #d4af37; }
+
+/* ── PERÍCIAS ── */
+.pericias-table { width: 100%; border-collapse: collapse; }
+.pericias-table th {
+  font-family: var(--font-title);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  padding: 4px 4px;
+  border-bottom: 1px solid var(--gold-border);
+  text-align: left;
+}
+.pericias-table th:last-child { text-align: center; }
+.pericias-table td {
+  padding: 3px 4px;
+  border-bottom: 1px solid rgba(212,175,55,.06);
+  vertical-align: middle;
+  font-size: 12px;
+}
+.pericias-table tr:hover td { background: rgba(212,175,55,.04); }
+.pericia-nome { color: var(--text); font-size: 12px; }
+.pericia-check { width: 14px; height: 14px; accent-color: var(--gold); cursor: pointer; }
+.pericia-attr-sel {
+  background: none !important;
+  border: none !important;
+  color: var(--text-dim) !important;
+  font-size: 10px !important;
+  padding: 0 2px !important;
+  width: auto !important;
+  cursor: pointer;
+}
+.pericia-outros {
+  width: 34px !important;
+  font-size: 11px !important;
+  padding: 2px 3px !important;
+}
+.btn-rolar {
+  background: rgba(212,175,55,.08);
+  border: 1px solid rgba(212,175,55,.2);
+  color: var(--gold);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.btn-rolar:hover { background: rgba(212,175,55,.18); box-shadow: 0 0 8px var(--gold-glow); }
+
+/* ── ATAQUES ── */
+.ataque-linha {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.btn-icon {
+  background: none;
+  border: 1px solid var(--gold-border);
+  color: var(--text-dim);
+  border-radius: 4px;
+  width: 26px; height: 26px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-icon:hover { color: var(--gold); border-color: var(--gold); }
+.btn-icon.danger:hover { color: #e74c3c; border-color: #e74c3c; }
+.btn-add {
+  background: rgba(212,175,55,.07);
+  border: 1px dashed rgba(212,175,55,.25);
+  color: var(--text-dim);
+  border-radius: 4px;
+  width: 100%; padding: 5px;
+  cursor: pointer; font-size: 11px;
+  font-family: var(--font-body);
+  transition: all .15s;
+  margin-top: 4px;
+}
+.btn-add:hover { color: var(--gold); border-color: var(--gold); background: var(--gold-glow); }
+
+/* ── PODERES ── */
+.poder-item {
+  background: var(--ink3);
+  border: 1px solid var(--gold-border);
+  border-radius: 5px;
+  padding: 7px 9px;
+  margin-bottom: 6px;
+  position: relative;
+}
+.poder-header { display: flex; gap: 6px; align-items: flex-start; }
+.poder-nome-input {
+  font-weight: 600 !important;
+  color: var(--gold-text) !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+}
+.poder-nome-input:focus { border-color: var(--gold-border) !important; background: rgba(0,0,0,.3) !important; }
+.poder-desc { margin-top: 5px; font-size: 12px; color: var(--text-dim); }
+
+/* ── MAGIAS ── */
+.magia-circulo {
+  background: var(--ink3);
+  border: 1px solid var(--gold-border);
+  border-radius: 5px;
+  padding: 6px 9px;
+  margin-bottom: 6px;
+}
+.magia-circulo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+.circulo-label {
+  font-family: var(--font-title);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--gold);
+}
+.magia-linha {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+/* ── EQUIPAMENTOS ── */
+.item-linha {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr auto;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+/* ── BADGES ── */
+.badge {
+  display: inline-block;
+  font-family: var(--font-title);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 1px solid;
+  text-transform: uppercase;
+}
+.badge-gold   { color: var(--gold);   border-color: var(--gold);   background: var(--gold-glow); }
+.badge-red    { color: #e07070;       border-color: var(--red);    background: var(--red-dim); }
+.badge-blue   { color: #7eb3e8;       border-color: var(--blue);   background: var(--blue-dim); }
+.badge-purple { color: #b794f4;       border-color: var(--purple); background: var(--purple-dim); }
+.badge-green  { color: #5ebd8a;       border-color: var(--green);  background: var(--green-dim); }
+
+/* ── DIVIDER ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--gold-border);
+  margin: 8px 0;
+}
+
+/* ── SAVE BAR ── */
+.save-bar {
+  display: flex; gap: 8px; justify-content: flex-end;
+  padding: 8px 10px;
+  border-top: 1px solid var(--gold-border);
+  background: var(--ink2);
+  position: sticky; bottom: 0; z-index: 5;
+}
+.btn-save {
+  background: rgba(212,175,55,.12);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: var(--font-title);
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-save:hover { background: rgba(212,175,55,.22); box-shadow: 0 0 12px var(--gold-glow); }
+.btn-save.danger { border-color: #e74c3c; color: #e74c3c; }
+.btn-save.danger:hover { background: rgba(231,76,60,.15); }
+
+/* ── NOTA FLAVOR ── */
+.flavor-note {
+  font-family: var(--font-flavor);
+  font-style: italic;
+  font-size: 11px;
+  color: var(--text-dim);
+  border-left: 2px solid var(--gold-border);
+  padding-left: 8px;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+/* ── OP TABS (Ordem Paranormal) ── */
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--gold-border);
+  margin-bottom: 10px;
+  gap: 2px;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  font-family: var(--font-title);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all .15s;
+  text-transform: uppercase;
+}
+.tab-btn:hover { color: var(--gold-text); }
+.tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── RITUALS NEX ── */
+.nex-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--ink3);
+  border: 1px solid var(--gold-border);
+  border-radius: 5px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+.nex-val {
+  font-family: var(--font-title);
+  font-size: 22px;
+  color: var(--purple);
+  min-width: 44px;
+  text-align: center;
+}
+.nex-label {
+  font-family: var(--font-title);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+.nex-input {
+  width: 60px !important;
+  font-size: 18px !important;
+  color: var(--purple) !important;
+  border-color: var(--purple-dim) !important;
+}
+
+
+/* ── SELECT COM CAMPO CUSTOM ── */
+.select-custom-wrap { display:flex; flex-direction:column; gap:3px; }
+.select-custom-wrap input.custom-input {
+  display:none;
+  border-color: rgba(139,92,246,.4) !important;
+}
+.select-custom-wrap input.custom-input.visible { display:block; }
+
+/* ── FICHA MAIN TABS (T20 / OP) ── */
+.ficha-main-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0;
+  border-bottom: 2px solid var(--gold-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--ink);
+  padding: 0 2px;
+}
+.ficha-main-tab {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  color: var(--text-dim);
+  font-family: var(--font-title);
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all .2s;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ficha-main-tab:hover { color: var(--gold-text); }
+.ficha-main-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.ficha-main-tab .tab-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--purple);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.ficha-main-tab.active .tab-dot { opacity: 1; }
+.ficha-page { display: none; }
+.ficha-page.active { display: block; }
+
+/* Sanidade */
+.san-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--ink3);
+  border: 1px solid rgba(139,92,246,.3);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+.san-label {
+  font-family: var(--font-title);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #b794f4;
+}
+.san-val { font-family: var(--font-title); font-size: 22px; color: #b794f4; min-width:36px; text-align:center; }
+.san-btn { background:rgba(139,92,246,.1); border:1px solid rgba(139,92,246,.3); color:#b794f4; border-radius:4px; padding:2px 8px; font-size:11px; cursor:pointer; transition:all .15s; font-family:var(--font-body); }
+.san-btn:hover { background:rgba(139,92,246,.25); }
+
+/* ── HEADER PERSONAGEM ── */
+.char-header {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.char-avatar {
+  width: 60px; height: 60px;
+  border-radius: 6px;
+  border: 1px solid var(--gold-border);
+  background: var(--ink3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color .2s;
+  overflow: hidden;
+}
+.char-avatar:hover { border-color: var(--gold); }
+.char-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px; }
+.char-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="ficha-root" id="fichaRoot">
+
+  <!-- ABAS PRINCIPAIS -->
+  <div class="ficha-main-tabs">
+    <button class="ficha-main-tab active" onclick="trocarFichaPage('tormenta',this)">⚔️ Tormenta20</button>
+    <button class="ficha-main-tab" onclick="trocarFichaPage('op',this)">🌀 Ordem Paranormal <span class="tab-dot"></span></button>
+  </div>
+
+  <!-- PAGE: TORMENTA20 -->
+  <div class="ficha-page active" id="page-tormenta">
+
+  <!-- ══ CABEÇALHO ══ -->
+  <div class="char-header">
+    <div class="char-avatar" id="avatarBtn" title="Clique para trocar imagem">
+      🧙
+      <input type="file" id="avatarInput" accept="image/*" style="display:none">
+    </div>
+    <div class="char-info">
+      <div class="row">
+        <div class="campo">
+          <label>Nome do Personagem</label>
+          <input type="text" id="nomeChar" placeholder="Fulano das Dores">
+        </div>
+        <div class="campo" style="flex:0 0 60px">
+          <label>Nível</label>
+          <input type="number" id="nivelChar" value="1" min="1" max="20" oninput="recalcularTudo()">
+        </div>
+      </div>
+      <div class="row">
+        <div class="campo">
+          <label>Raça</label>
+          <select id="racaChar">
+            <option value="">— Raça —</option>
+            <option>Humano</option><option>Elfo</option><option>Meio-Elfo</option>
+            <option>Anão</option><option>Halfling</option><option>Goblin</option>
+            <option>Lefou</option><option>Minotauro</option><option>Qareen</option>
+            <option>Sereia/Tritão</option><option>Sílfide</option><option>Suraggel</option>
+            <option>Osteon</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Classe</label>
+          <div class="select-custom-wrap">
+            <select id="classeChar" onchange="onSelectCustom(this)">
+              <option value="">— Classe —</option>
+              <option>Arcanista</option><option>Bárbaro</option><option>Bardo</option>
+              <option>Bucaneiro</option><option>Caçador</option><option>Cavaleiro</option>
+              <option>Clérigo</option><option>Druida</option><option>Guerreiro</option>
+              <option>Inventor</option><option>Ladino</option><option>Lutador</option>
+              <option>Nobre</option><option>Paladino</option><option>Patrulheiro</option>
+              <option>Xamã</option>
+              <option value="__custom__">✏️ Outra (homebrew)...</option>
+            </select>
+            <input type="text" id="classeChar_custom" class="custom-input" placeholder="Digite a classe..." oninput="salvarLocal()">
+          </div>
+        </div>
+        <div class="campo">
+          <label>Origem</label>
+          <div class="select-custom-wrap">
+            <select id="origemChar" onchange="onSelectCustom(this)">
+              <option value="">— Origem —</option>
+              <option>Acólito</option><option>Amnésico</option><option>Amante</option>
+              <option>Artesão</option><option>Artista</option><option>Assistente de Laboratório</option>
+              <option>Charlatão</option><option>Circense</option><option>Criminoso</option>
+              <option>Cultista Arrependido</option><option>Ermitão</option><option>Escravo Liberto</option>
+              <option>Estudioso</option><option>Fazendeiro</option><option>Forasteiro</option>
+              <option>Gladiador</option><option>Guarda</option><option>Herói Camponês</option>
+              <option>Iniciado</option><option>Marinheiro</option><option>Mercador</option>
+              <option>Mercenário</option><option>Nobre</option><option>Órfão</option>
+              <option>Pirata</option><option>Refugiado</option><option>Religioso</option>
+              <option>Selvagem</option><option>Soldado</option><option>Taverneiro</option>
+              <option value="__custom__">✏️ Outra (homebrew)...</option>
+            </select>
+            <input type="text" id="origemChar_custom" class="custom-input" placeholder="Digite a origem..." oninput="salvarLocal()">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Divindade / Tendência -->
+  <div class="secao">
+    <div class="secao-titulo" onclick="toggleSecao(this)">⚜️ Identidade</div>
+    <div class="secao-body">
+      <div class="row">
+        <div class="campo">
+          <label>Divindade / Patrono</label>
+          <div class="select-custom-wrap">
+            <select id="divindadeChar" onchange="onSelectCustom(this)">
+              <option value="">— Sem divindade —</option>
+              <option>Aharadak</option><option>Ailu</option><option>Arsenal</option>
+              <option>Azgher</option><option>Cyclous</option><option>Dibuk</option>
+              <option>Farya</option><option>Grand</option><option>Hyninn</option>
+              <option>Kallyadranoch</option><option>Khalmyr</option><option>Lena</option>
+              <option>Lin-Wu</option><option>Megalokk</option><option>Mestre das Marés</option>
+              <option>Nimb</option><option>Oceano</option><option>Sszzaas</option>
+              <option>Tahine</option><option>Tanna-Toh</option><option>Tenebra</option>
+              <option>Thwor</option><option>Thyatis</option><option>Trog</option>
+              <option>V3</option><option>Valkaria</option>
+              <option value="__custom__">✏️ Outra / Homebrew...</option>
+            </select>
+            <input type="text" id="divindadeChar_custom" class="custom-input" placeholder="Nome da divindade..." oninput="salvarLocal()">
+          </div>
+        </div>
+        <div class="campo">
+          <label>Tendência</label>
+          <select id="tendenciaChar">
+            <option>Leal e Bom</option><option>Neutro e Bom</option><option>Caótico e Bom</option>
+            <option>Leal e Neutro</option><option>Neutro</option><option>Caótico e Neutro</option>
+            <option>Leal e Mau</option><option>Neutro e Mau</option><option>Caótico e Mau</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Tamanho</label>
+          <select id="tamanhoChar">
+            <option>Médio</option><option>Pequeno</option><option>Grande</option>
+            <option>Minúsculo</option><option>Enorme</option><option>Colossal</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="campo">
+          <label>Deslocamento (m)</label>
+          <input type="number" id="deslocamento" value="9" min="0" step="1.5">
+        </div>
+        <div class="campo">
+          <label>Idiomas</label>
+          <input type="text" id="idiomas" placeholder="Comum, Élfico...">
+        </div>
+        <div class="campo">
+          <label>Experiência (XP)</label>
+          <input type="number" id="xpChar" value="0">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ATRIBUTOS ══ -->
+  <div class="secao">
+    <div class="secao-titulo" onclick="toggleSecao(this)">🎯 Atributos</div>
+    <div class="secao-body">
+      <div class="atributos-grid" id="atributosGrid">
+        <!-- gerado por JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STATUS (PV / PE / DEF / ...) ══ -->
+  <div class="secao">
+    <div class="secao-titulo" onclick="toggleSecao(this)">❤️ Status</div>
+    <div class="secao-body">
+      <div class="status-bars">
+        <div class="status-bar">
+          <div class="status-bar-label pv-label">❤️ PV <span id="pvMaxAuto" style="font-size:9px;color:var(--text-dim)"></span></div>
+          <div class="status-bar-values">
+            <input type="number" id="pvAtual" value="10" placeholder="Atual" title="PV Atual">
+            <span class="status-sep">/</span>
+            <input type="number" id="pvMax" value="10" placeholder="Máx" title="PV Máximo" oninput="salvarLocal()">
+          </div>
+          <div style="display:flex;gap:4px;margin-top:4px">
+            <button class="btn-rolar" onclick="ajustarPV(-1)" style="flex:1">-1</button>
+            <button class="btn-rolar" onclick="ajustarPV(-5)" style="flex:1">-5</button>
+            <button class="btn-rolar" onclick="ajustarPV(5)"  style="flex:1">+5</button>
+            <button class="btn-rolar" onclick="restaurarPV()" style="flex:1">↺</button>
+          </div>
+        </div>
+        <div class="status-bar">
+          <div class="status-bar-label pe-label">🔷 PE <span id="peMaxAuto" style="font-size:9px;color:var(--text-dim)"></span></div>
+          <div class="status-bar-values">
+            <input type="number" id="peAtual" value="0" placeholder="Atual" title="PE Atual">
+            <span class="status-sep">/</span>
+            <input type="number" id="peMax" value="0" placeholder="Máx" title="PE Máximo" oninput="salvarLocal()">
+          </div>
+          <div style="display:flex;gap:4px;margin-top:4px">
+            <button class="btn-rolar" onclick="ajustarPE(-1)" style="flex:1">-1</button>
+            <button class="btn-rolar" onclick="ajustarPE(-3)" style="flex:1">-3</button>
+            <button class="btn-rolar" onclick="ajustarPE(3)"  style="flex:1">+3</button>
+            <button class="btn-rolar" onclick="restaurarPE()" style="flex:1">↺</button>
+          </div>
+        </div>
+        <div class="status-bar">
+          <div class="status-bar-label def-label">🛡️ Defesa</div>
+          <div class="status-bar-values">
+            <input type="number" id="defTotal" value="10" title="Defesa Total" oninput="salvarLocal()">
+          </div>
+          <hr class="divider">
+          <div class="row" style="gap:4px">
+            <div class="campo">
+              <label>Fortitude</label>
+              <input type="number" id="fortitude" value="0" oninput="salvarLocal()">
+            </div>
+            <div class="campo">
+              <label>Reflexos</label>
+              <input type="number" id="reflexos" value="0" oninput="salvarLocal()">
+            </div>
+            <div class="campo">
+              <label>Vontade</label>
+              <input type="number" id="vontade" value="0" oninput="salvarLocal()">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PERÍCIAS ══ -->
+  <div class="secao">
+    <div class="secao-titulo" onclick="toggleSecao(this)">📋 Perícias</div>
+    <div class="secao-body" style="padding:6px 0">
+      <table class="pericias-table" id="periciasTabela">
+        <thead>
+          <tr>
+            <th style="width:16px">T</th>
+            <th>Perícia</th>
+            <th style="width:56px">Atributo</th>
+            <th style="width:36px" title="Outros bônus">+Bôn</th>
+            <th style="width:44px">Rolar</th>
+          </tr>
+        </thead>
+        <tbody id="periciasBody">
+          <!-- gerado por JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ ATAQUES ══ -->
+  <div class="secao">
+    <div class="secao-titulo" onclick="toggleSecao(this)">⚔️ Ataques</div>
+    <div class="secao-body">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:5px;margin-bottom:4px">
+        <label style="margin:0">Arma / Ataque</label>
+        <label style="margin:0;text-align:center">Bonus Atq</label>
+        <label style="margin:0;text-align:center">Dano</label>
+        <label style="margin:0;text-align:center">Crítico</label>
+        <span></span>
+      </div>
+      <div id="ataquesList"></div>
+      <button class="btn-add" onclick="adicionarAtaque()">+ Adicionar ataque</button>
+    </div>
+  </div>
+
+  <!-- ══ PODERES ══ -->
+  <div class="secao">
+    <div class="secao-titulo" onclick="toggleSecao(this)">✨ Poderes & Habilidades</div>
+    <div class="secao-body">
+      <div id="poderesLista"></div>
+      <button class="btn-add" onclick="adicionarPoder()">+ Adicionar poder / habilidade</button>
+    </div>
+  </div>
+
+  <!-- ══ MAGIAS ══ -->
+  <div class="secao" id="secaoMagias">
+    <div class="secao-titulo" onclick="toggleSecao(this)">🔮 Magias</div>
+    <div class="secao-body">
+      <div class="row" style="margin-bottom:10px">
+        <div class="campo">
+          <label>Tradição Mágica</label>
+          <select id="tradicaoMagica">
+            <option value="">—</option>
+            <option>Arcana</option><option>Divina</option><option>Primal</option><option>Ocultismo</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Atributo de Conjuração</label>
+          <select id="attrConjuracao">
+            <option value="int">INT</option><option value="sab">SAB</option>
+            <option value="car">CAR</option><option value="for">FOR</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>CD de Magia</label>
+          <input type="number" id="cdMagia" value="10" readonly style="background:rgba(0,0,0,.5);cursor:default">
+        </div>
+      </div>
+      <div id="magiasPorCirculo"></div>
+      <button class="btn-add" onclick="adicionarCirculo()">+ Adicionar círculo</button>
+    </div>
+  </div>
+
+  <!-- ══ EQUIPAMENTOS ══ -->
+  <div class="secao">
+    <div class="secao-titulo" onclick="toggleSecao(this)">🎒 Equipamentos & Inventário</div>
+    <div class="secao-body">
+      <div style="display:grid;grid-template-columns:3fr 1fr 1fr auto;gap:5px;margin-bottom:4px">
+        <label style="margin:0">Item</label>
+        <label style="margin:0;text-align:center">Qtd</label>
+        <label style="margin:0;text-align:center">Peso (kg)</label>
+        <span></span>
+      </div>
+      <div id="inventarioLista"></div>
+      <button class="btn-add" onclick="adicionarItem()">+ Adicionar item</button>
+      <hr class="divider">
+      <div class="row">
+        <div class="campo">
+          <label>Tibar (Ouro) 🪙</label>
+          <input type="number" id="dinheiro" value="0" min="0">
+        </div>
+        <div class="campo">
+          <label>Peso Total (kg)</label>
+          <input type="number" id="pesoTotal" value="0" readonly style="cursor:default;background:rgba(0,0,0,.5)">
+        </div>
+        <div class="campo">
+          <label>Capacidade (kg)</label>
+          <input type="number" id="capacidadePeso" value="0" readonly style="cursor:default;background:rgba(0,0,0,.5)">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NOTAS ══ -->
+  <div class="secao">
+    <div class="secao-titulo" onclick="toggleSecao(this)">📝 Anotações & História</div>
+    <div class="secao-body">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="abrirTab('historia',this)">História</button>
+        <button class="tab-btn" onclick="abrirTab('notas',this)">Notas</button>
+        <button class="tab-btn" onclick="abrirTab('aliados',this)">Aliados/Inimigos</button>
+      </div>
+      <div class="tab-content active" id="tab-historia">
+        <textarea id="historiaText" placeholder="Descreva a história do personagem..."></textarea>
+      </div>
+      <div class="tab-content" id="tab-notas">
+        <textarea id="notasText" placeholder="Notas de sessão, lembretes..."></textarea>
+      </div>
+      <div class="tab-content" id="tab-aliados">
+        <textarea id="aliadosText" placeholder="Aliados, inimigos, NPCs importantes..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- fim page-tormenta -->
+
+  <!-- PAGE: ORDEM PARANORMAL -->
+  <div class="ficha-page" id="page-op">
+
+    <!-- Cabeçalho OP -->
+    <div class="secao">
+      <div class="secao-titulo" onclick="toggleSecao(this)">🌀 Identificação — Ordem Paranormal</div>
+      <div class="secao-body">
+        <div class="row">
+          <div class="campo">
+            <label>Codinome / Agente</label>
+            <input type="text" id="opAgente" placeholder="Nome do Agente / Codinome" oninput="salvarLocal()">
+          </div>
+          <div class="campo">
+            <label>Classe OP</label>
+            <div class="select-custom-wrap">
+              <select id="opClasse" onchange="onSelectCustom(this)">
+                <option value="">— Classe —</option>
+                <option>Combatente</option>
+                <option>Especialista</option>
+                <option>Ocultista</option>
+                <option value="__custom__">✏️ Outra (homebrew)...</option>
+              </select>
+              <input type="text" id="opClasse_custom" class="custom-input" placeholder="Digite a classe OP..." oninput="salvarLocal()">
+            </div>
+          </div>
+          <div class="campo" style="flex:0 0 80px">
+            <label>Nível OP</label>
+            <input type="number" id="opNivel" value="1" min="1" max="20" oninput="salvarLocal()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEX + Sanidade -->
+    <div class="secao">
+      <div class="secao-titulo" onclick="toggleSecao(this)">📊 NEX & Sanidade</div>
+      <div class="secao-body">
+        <div class="nex-bar">
+          <div>
+            <div class="nex-label">NEX</div>
+            <div class="nex-val" id="nexDisplay">5%</div>
+          </div>
+          <div style="flex:1">
+            <label>NEX (%)</label>
+            <input type="number" class="nex-input" id="nexValor" value="5" min="5" max="99" step="5"
+                   oninput="document.getElementById('nexDisplay').textContent=this.value+'%';salvarLocal()">
+          </div>
+          <div style="flex:1">
+            <label>Espaços de ritual</label>
+            <input type="number" id="opEspacos" value="0" min="0" oninput="salvarLocal()">
+          </div>
+        </div>
+        <!-- Sanidade -->
+        <div class="san-bar">
+          <div>
+            <div class="san-label">SANIDADE</div>
+            <div class="san-val" id="sanDisplay">20</div>
+          </div>
+          <div style="flex:1">
+            <label>San. Atual</label>
+            <input type="number" id="sanAtual" value="20" min="0"
+                   oninput="document.getElementById('sanDisplay').textContent=this.value;salvarLocal()">
+          </div>
+          <div style="flex:1">
+            <label>San. Máxima</label>
+            <input type="number" id="sanMax" value="20" min="0" oninput="salvarLocal()">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <button class="san-btn" onclick="ajustarSan(-1)">-1</button>
+            <button class="san-btn" onclick="ajustarSan(-5)">-5</button>
+            <button class="san-btn" onclick="ajustarSan(5)">+5</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rituais -->
+    <div class="secao">
+      <div class="secao-titulo" onclick="toggleSecao(this)">📿 Rituais</div>
+      <div class="secao-body">
+        <div id="rituaisLista"></div>
+        <button class="btn-add" onclick="adicionarRitual()">+ Adicionar ritual</button>
+      </div>
+    </div>
+
+    <!-- Poderes Paranormais -->
+    <div class="secao">
+      <div class="secao-titulo" onclick="toggleSecao(this)">👁️ Poderes Paranormais</div>
+      <div class="secao-body">
+        <div id="paranormalLista"></div>
+        <button class="btn-add" onclick="adicionarParanormal()">+ Adicionar poder paranormal</button>
+      </div>
+    </div>
+
+    <!-- Traumas -->
+    <div class="secao">
+      <div class="secao-titulo" onclick="toggleSecao(this)">🩸 Traumas & Sequelas</div>
+      <div class="secao-body">
+        <textarea id="traumasText" placeholder="Descreva traumas, sequelas e perturbações paranormais..." style="min-height:80px" oninput="salvarLocal()"></textarea>
+      </div>
+    </div>
+
+  </div><!-- fim page-op -->
+
+  <!-- ══ SAVE BAR ══ -->
+  <div class="save-bar">
+    <button class="btn-save danger" onclick="limparFicha()">🗑 Limpar</button>
+    <button class="btn-save" onclick="exportarJSON()">⬇ Exportar</button>
+    <button class="btn-save" onclick="importarJSON()">⬆ Importar</button>
+    <button class="btn-save" onclick="salvarLocal()">💾 Salvar</button>
+  </div>
+
+</div><!-- fim ficha-root -->
+
+<input type="file" id="importInput" accept=".json" style="display:none">
+
+<script>
+// ═══════════════════════════════════════════════
+// DADOS ESTÁTICOS T20
+// ═══════════════════════════════════════════════
+const ATRIBUTOS = [
+  { id:'for', nome:'FOR', desc:'Força' },
+  { id:'des', nome:'DES', desc:'Destreza' },
+  { id:'con', nome:'CON', desc:'Constituição' },
+  { id:'int', nome:'INT', desc:'Inteligência' },
+  { id:'sab', nome:'SAB', desc:'Sabedoria' },
+  { id:'car', nome:'CAR', desc:'Carisma' },
+];
+
+const PERICIAS_T20 = [
+  { nome:'Acrobacia',       attr:'des' },
+  { nome:'Adestramento',    attr:'car' },
+  { nome:'Atletismo',       attr:'for' },
+  { nome:'Atuação',         attr:'car' },
+  { nome:'Cavalgar',        attr:'des' },
+  { nome:'Conhecimento',    attr:'int' },
+  { nome:'Cura',            attr:'sab' },
+  { nome:'Diplomacia',      attr:'car' },
+  { nome:'Enganação',       attr:'car' },
+  { nome:'Fortitude',       attr:'con' },
+  { nome:'Furtividade',     attr:'des' },
+  { nome:'Guerra',          attr:'int' },
+  { nome:'Iniciativa',      attr:'des' },
+  { nome:'Intimidação',     attr:'car' },
+  { nome:'Intuição',        attr:'sab' },
+  { nome:'Investigação',    attr:'int' },
+  { nome:'Jogatina',        attr:'car' },
+  { nome:'Ladinagem',       attr:'des' },
+  { nome:'Luta',            attr:'for' },
+  { nome:'Magia',           attr:'int' },
+  { nome:'Medicina',        attr:'sab' },
+  { nome:'Misticismo',      attr:'sab' },
+  { nome:'Natureza',        attr:'sab' },
+  { nome:'Nobreza',         attr:'int' },
+  { nome:'Obstruções',      attr:'des' },
+  { nome:'Ofício',          attr:'int' },
+  { nome:'Percepção',       attr:'sab' },
+  { nome:'Pilotagem',       attr:'des' },
+  { nome:'Pontaria',        attr:'des' },
+  { nome:'Profissão',       attr:'int' },
+  { nome:'Reflexos',        attr:'des' },
+  { nome:'Religião',        attr:'sab' },
+  { nome:'Sobrevivência',   attr:'sab' },
+  { nome:'Tecnologia',      attr:'int' },
+  { nome:'Vontade',         attr:'sab' },
+];
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+let ataques = [];
+let poderes = [];
+let magiasCirculos = [];
+let inventario = [];
+let rituais = [];
+let paranormals = [];
+
+
+// ═══════════════════════════════════════════════
+// SELECT COM CAMPO LIVRE (homebrew)
+// ═══════════════════════════════════════════════
+function onSelectCustom(sel) {
+  const wrap = sel.closest('.select-custom-wrap');
+  if (!wrap) return;
+  const inp = wrap.querySelector('.custom-input');
+  if (!inp) return;
+  if (sel.value === '__custom__') {
+    inp.classList.add('visible');
+    inp.focus();
+  } else {
+    inp.classList.remove('visible');
+    inp.value = '';
+  }
+  salvarLocal();
+}
+
+function getSelectCustomValue(baseId) {
+  const sel = document.getElementById(baseId);
+  if (!sel) return '';
+  if (sel.value === '__custom__') {
+    const inp = document.getElementById(baseId + '_custom');
+    return inp ? inp.value : '';
+  }
+  return sel.value;
+}
+
+function setSelectCustomValue(baseId, value) {
+  const sel = document.getElementById(baseId);
+  if (!sel) return;
+  // tenta encontrar a opção
+  const opt = Array.from(sel.options).find(o => o.value === value || o.text === value);
+  if (opt) {
+    sel.value = opt.value;
+    const inp = document.getElementById(baseId + '_custom');
+    if (inp) inp.classList.remove('visible');
+  } else if (value) {
+    sel.value = '__custom__';
+    const inp = document.getElementById(baseId + '_custom');
+    if (inp) { inp.value = value; inp.classList.add('visible'); }
+  }
+}
+
+function init() {
+  renderAtributos();
+  renderPericias();
+  carregarLocal();
+  setupAvatar();
+}
+
+// ═══════════════════════════════════════════════
+// ATRIBUTOS
+// ═══════════════════════════════════════════════
+function renderAtributos() {
+  const grid = document.getElementById('atributosGrid');
+  grid.innerHTML = ATRIBUTOS.map(a => `
+    <div class="attr-box">
+      <div class="attr-nome">${a.nome}</div>
+      <input type="number" class="attr-val" id="${a.id}-val" value="10" min="1" max="30"
+             oninput="recalcularTudo()" title="${a.desc}">
+      <div class="attr-mod" id="${a.id}-mod" onclick="rolarAtributo('${a.id}')" title="Clique para rolar">+0</div>
+      <div class="attr-mod-label">MOD</div>
+    </div>
+  `).join('');
+}
+
+function getMod(val) {
+  return Math.floor((parseInt(val || 10) - 10) / 2);
+}
+
+function recalcularTudo() {
+  // Modificadores
+  ATRIBUTOS.forEach(a => {
+    const val = document.getElementById(`${a.id}-val`)?.value || 10;
+    const mod = getMod(val);
+    const el = document.getElementById(`${a.id}-mod`);
+    if (el) el.textContent = (mod >= 0 ? '+' : '') + mod;
+  });
+  // CD magia
+  const attrConj = document.getElementById('attrConjuracao')?.value || 'int';
+  const valConj = document.getElementById(`${attrConj}-val`)?.value || 10;
+  const nivel = parseInt(document.getElementById('nivelChar')?.value || 1);
+  const cd = 10 + getMod(valConj) + Math.floor(nivel / 2);
+  const cdEl = document.getElementById('cdMagia');
+  if (cdEl) cdEl.value = cd;
+  // Capacidade de carga
+  const forVal = document.getElementById('for-val')?.value || 10;
+  const cap = parseInt(forVal) * 5;
+  const capEl = document.getElementById('capacidadePeso');
+  if (capEl) capEl.value = cap;
+  // Peso total
+  calcularPesoTotal();
+  salvarLocal();
+}
+
+// ═══════════════════════════════════════════════
+// PERÍCIAS
+// ═══════════════════════════════════════════════
+function renderPericias() {
+  const tbody = document.getElementById('periciasBody');
+  tbody.innerHTML = PERICIAS_T20.map((p, i) => {
+    const id = `p${i}`;
+    return `
+    <tr>
+      <td><input type="checkbox" class="pericia-check" id="${id}-t" onchange="salvarLocal()"></td>
+      <td class="pericia-nome">${p.nome}</td>
+      <td>
+        <select class="pericia-attr-sel" id="${id}-a" onchange="salvarLocal()">
+          ${ATRIBUTOS.map(a => `<option value="${a.id}" ${a.id===p.attr?'selected':''}>${a.nome}</option>`).join('')}
+        </select>
+      </td>
+      <td><input type="number" class="pericia-outros" id="${id}-o" value="0" oninput="salvarLocal()"></td>
+      <td style="text-align:center">
+        <button class="btn-rolar" onclick="rolarPericia(${i})">🎲</button>
+      </td>
+    </tr>
+    `;
+  }).join('');
+}
+
+function rolarPericia(i) {
+  const id = `p${i}`;
+  const treinado  = document.getElementById(`${id}-t`)?.checked;
+  const attrSel   = document.getElementById(`${id}-a`)?.value || 'des';
+  const outros    = parseInt(document.getElementById(`${id}-o`)?.value || 0);
+  const nivel     = parseInt(document.getElementById('nivelChar')?.value || 1);
+  const attrVal   = parseInt(document.getElementById(`${attrSel}-val`)?.value || 10);
+  const modAttr   = getMod(attrVal);
+  const bonusTr   = treinado ? 2 : 0;
+  const metaNivel = Math.floor(nivel / 2);
+  const totalMod  = metaNivel + modAttr + bonusTr + outros;
+  const dado      = Math.floor(Math.random() * 20) + 1;
+  const total     = dado + totalMod;
+  const isCrit    = dado === 20;
+  const isFumble  = dado === 1;
+  const cls       = isCrit ? 'chat-crit' : isFumble ? 'chat-fumble' : '';
+  const bonStr    = totalMod >= 0 ? `+${totalMod}` : `${totalMod}`;
+  // Envia para o chat global se existir
+  if (typeof adicionarMensagemChat === 'function') {
+    adicionarMensagemChat(`
+      <div class="roll-entry">
+        <span class="roll-label" style="color:#c9a0ff">📜 ${PERICIAS_T20[i].nome}</span>
+        <span class="roll-dice">D20[${dado}] ${bonStr} <small style="color:#888">(½Nív:${metaNivel} ${attrSel.toUpperCase()}:${modAttr>=0?'+':''}${modAttr} Treino:${bonusTr} Outros:${outros>=0?'+':''}${outros})</small></span>
+        <span class="roll-total ${cls}">${total}${isCrit?' ✨ CRÍTICO!':isFumble?' 💀 FALHA!':''}</span>
+      </div>
+    `);
+    if (typeof animarDado3D === 'function') animarDado3D(20, dado);
+    if (typeof toggleChat === 'function') { const cp = document.getElementById('chat-panel'); if(cp && !cp.classList.contains('chat-open')) toggleChat(); }
+  } else {
+    alert(`${PERICIAS_T20[i].nome}: D20[${dado}] ${bonStr} = ${total}${isCrit?' CRÍTICO!':isFumble?' FALHA!':''}`);
+  }
+}
+
+function rolarAtributo(attr) {
+  const val = parseInt(document.getElementById(`${attr}-val`)?.value || 10);
+  const mod = getMod(val);
+  const dado = Math.floor(Math.random() * 20) + 1;
+  const total = dado + mod;
+  const isCrit = dado === 20, isFumble = dado === 1;
+  const cls = isCrit ? 'chat-crit' : isFumble ? 'chat-fumble' : '';
+  const modStr = mod >= 0 ? `+${mod}` : `${mod}`;
+  if (typeof adicionarMensagemChat === 'function') {
+    adicionarMensagemChat(`
+      <div class="roll-entry">
+        <span class="roll-label" style="color:#ffd700">🎯 Teste de ${attr.toUpperCase()}</span>
+        <span class="roll-dice">D20[${dado}] ${modStr}</span>
+        <span class="roll-total ${cls}">${total}${isCrit?' ✨ CRÍTICO!':isFumble?' 💀 FALHA!':''}</span>
+      </div>
+    `);
+    if (typeof animarDado3D === 'function') animarDado3D(20, dado);
+  } else {
+    alert(`Teste de ${attr.toUpperCase()}: D20[${dado}] ${modStr} = ${total}`);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PV / PE
+// ═══════════════════════════════════════════════
+function ajustarPV(delta) {
+  const el = document.getElementById('pvAtual');
+  const max = parseInt(document.getElementById('pvMax').value || 0);
+  el.value = Math.max(0, Math.min(max, parseInt(el.value || 0) + delta));
+  salvarLocal();
+}
+function restaurarPV() {
+  document.getElementById('pvAtual').value = document.getElementById('pvMax').value;
+  salvarLocal();
+}
+function ajustarPE(delta) {
+  const el = document.getElementById('peAtual');
+  const max = parseInt(document.getElementById('peMax').value || 0);
+  el.value = Math.max(0, Math.min(max, parseInt(el.value || 0) + delta));
+  salvarLocal();
+}
+function restaurarPE() {
+  document.getElementById('peAtual').value = document.getElementById('peMax').value;
+  salvarLocal();
+}
+
+// ═══════════════════════════════════════════════
+// ATAQUES
+// ═══════════════════════════════════════════════
+function renderAtaques() {
+  const cont = document.getElementById('ataquesList');
+  cont.innerHTML = ataques.map((a, i) => `
+    <div class="ataque-linha">
+      <input type="text"   value="${a.nome  ||''}" placeholder="Ex: Espada Longa" oninput="ataques[${i}].nome=this.value;salvarLocal()">
+      <input type="text"   value="${a.bonus ||''}" placeholder="+5" oninput="ataques[${i}].bonus=this.value;salvarLocal()">
+      <input type="text"   value="${a.dano  ||''}" placeholder="1d8+3" oninput="ataques[${i}].dano=this.value;salvarLocal()">
+      <input type="text"   value="${a.critico||''}" placeholder="20/×2" oninput="ataques[${i}].critico=this.value;salvarLocal()">
+      <div style="display:flex;gap:3px">
+        <button class="btn-icon" onclick="rolarAtaque(${i})" title="Rolar ataque">🎲</button>
+        <button class="btn-icon danger" onclick="removerAtaque(${i})" title="Remover">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+function adicionarAtaque() {
+  ataques.push({ nome:'', bonus:'', dano:'', critico:'' });
+  renderAtaques(); salvarLocal();
+}
+function removerAtaque(i) {
+  ataques.splice(i, 1); renderAtaques(); salvarLocal();
+}
+function rolarAtaque(i) {
+  const a = ataques[i];
+  const bonus = parseInt(a.bonus) || 0;
+  const dadoAtq = Math.floor(Math.random() * 20) + 1;
+  const totalAtq = dadoAtq + bonus;
+  const bonStr = bonus >= 0 ? `+${bonus}` : `${bonus}`;
+  let danoStr = '';
+  if (a.dano) {
+    const m = a.dano.match(/^(\d*)d(\d+)([+-]\d+)?$/i);
+    if (m) {
+      const qt = parseInt(m[1]||1), ld = parseInt(m[2]), bn = parseInt(m[3]||0);
+      const dados = Array.from({length:qt}, () => Math.floor(Math.random()*ld)+1);
+      const td = dados.reduce((s,v)=>s+v,0)+bn;
+      danoStr = ` | Dano: [${dados.join(',')}]${bn?`${bn>=0?'+':''}${bn}`:''} = **${td}**`;
+    }
+  }
+  const isCrit = dadoAtq === 20, isFumble = dadoAtq === 1;
+  const cls = isCrit ? 'chat-crit' : isFumble ? 'chat-fumble' : '';
+  if (typeof adicionarMensagemChat === 'function') {
+    adicionarMensagemChat(`
+      <div class="roll-entry">
+        <span class="roll-label" style="color:#ff9944">⚔️ ${a.nome||'Ataque'}</span>
+        <span class="roll-dice">Ataque: D20[${dadoAtq}] ${bonStr}${danoStr}</span>
+        <span class="roll-total ${cls}">${totalAtq}${isCrit?' ✨ CRÍTICO!':isFumble?' 💀 ERROU!':''}</span>
+      </div>
+    `);
+    if (typeof animarDado3D === 'function') animarDado3D(20, dadoAtq);
+  } else {
+    alert(`${a.nome||'Ataque'}: D20[${dadoAtq}]${bonStr} = ${totalAtq}`);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PODERES
+// ═══════════════════════════════════════════════
+function renderPoderes() {
+  const cont = document.getElementById('poderesLista');
+  cont.innerHTML = poderes.map((p, i) => `
+    <div class="poder-item">
+      <div class="poder-header">
+        <input type="text" class="poder-nome-input" value="${p.nome||''}" placeholder="Nome do poder/habilidade"
+               oninput="poderes[${i}].nome=this.value;salvarLocal()" style="flex:1">
+        <select style="width:90px;font-size:11px" oninput="poderes[${i}].tipo=this.value;salvarLocal()">
+          ${['Ativo','Passivo','Reação','Magia','Especial'].map(t=>`<option ${p.tipo===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+        <button class="btn-icon danger" onclick="removerPoder(${i})">✕</button>
+      </div>
+      <textarea class="poder-desc" placeholder="Descrição, efeito, custo de PE..."
+                oninput="poderes[${i}].desc=this.value;salvarLocal()"
+                style="width:100%;margin-top:5px;min-height:40px">${p.desc||''}</textarea>
+    </div>
+  `).join('');
+}
+function adicionarPoder() {
+  poderes.push({ nome:'', tipo:'Passivo', desc:'' });
+  renderPoderes(); salvarLocal();
+}
+function removerPoder(i) {
+  poderes.splice(i, 1); renderPoderes(); salvarLocal();
+}
+
+// ═══════════════════════════════════════════════
+// MAGIAS
+// ═══════════════════════════════════════════════
+function renderMagias() {
+  const cont = document.getElementById('magiasPorCirculo');
+  cont.innerHTML = magiasCirculos.map((c, ci) => `
+    <div class="magia-circulo">
+      <div class="magia-circulo-header">
+        <span class="circulo-label">${c.circulo}° Círculo</span>
+        <div style="display:flex;gap:4px;align-items:center">
+          <span style="font-size:10px;color:var(--text-dim)">Espaços:</span>
+          <input type="number" value="${c.usados||0}" min="0" max="${c.total||0}" style="width:32px;font-size:11px;padding:2px" oninput="magiasCirculos[${ci}].usados=parseInt(this.value);salvarLocal()">
+          <span style="color:var(--text-dim)">/</span>
+          <input type="number" value="${c.total||0}" min="0" style="width:32px;font-size:11px;padding:2px" oninput="magiasCirculos[${ci}].total=parseInt(this.value);salvarLocal()">
+          <button class="btn-icon danger" onclick="removerCirculo(${ci})">✕</button>
+        </div>
+      </div>
+      ${c.magias.map((m, mi) => `
+        <div class="magia-linha">
+          <input type="text" value="${m.nome||''}" placeholder="Nome da magia"
+                 oninput="magiasCirculos[${ci}].magias[${mi}].nome=this.value;salvarLocal()">
+          <input type="text" value="${m.escola||''}" placeholder="Escola"
+                 oninput="magiasCirculos[${ci}].magias[${mi}].escola=this.value;salvarLocal()">
+          <button class="btn-icon danger" onclick="removerMagia(${ci},${mi})">✕</button>
+        </div>
+      `).join('')}
+      <button class="btn-add" onclick="adicionarMagia(${ci})">+ Magia</button>
+    </div>
+  `).join('');
+}
+function adicionarCirculo() {
+  const n = magiasCirculos.length + 1;
+  magiasCirculos.push({ circulo:n, total:1, usados:0, magias:[] });
+  renderMagias(); salvarLocal();
+}
+function removerCirculo(ci) {
+  magiasCirculos.splice(ci,1); renderMagias(); salvarLocal();
+}
+function adicionarMagia(ci) {
+  magiasCirculos[ci].magias.push({ nome:'', escola:'' });
+  renderMagias(); salvarLocal();
+}
+function removerMagia(ci, mi) {
+  magiasCirculos[ci].magias.splice(mi,1); renderMagias(); salvarLocal();
+}
+
+// ═══════════════════════════════════════════════
+// INVENTÁRIO
+// ═══════════════════════════════════════════════
+function renderInventario() {
+  const cont = document.getElementById('inventarioLista');
+  cont.innerHTML = inventario.map((it, i) => `
+    <div class="item-linha">
+      <input type="text" value="${it.nome||''}" placeholder="Item"
+             oninput="inventario[${i}].nome=this.value;salvarLocal()">
+      <input type="number" value="${it.qtd||1}" min="0"
+             oninput="inventario[${i}].qtd=parseInt(this.value)||0;calcularPesoTotal();salvarLocal()">
+      <input type="number" value="${it.peso||0}" min="0" step="0.1"
+             oninput="inventario[${i}].peso=parseFloat(this.value)||0;calcularPesoTotal();salvarLocal()">
+      <button class="btn-icon danger" onclick="removerItem(${i})">✕</button>
+    </div>
+  `).join('');
+}
+function adicionarItem() {
+  inventario.push({ nome:'', qtd:1, peso:0 });
+  renderInventario(); salvarLocal();
+}
+function removerItem(i) {
+  inventario.splice(i,1); renderInventario(); calcularPesoTotal(); salvarLocal();
+}
+function calcularPesoTotal() {
+  const total = inventario.reduce((s,it) => s + (it.peso||0)*(it.qtd||1), 0);
+  const el = document.getElementById('pesoTotal');
+  if (el) el.value = total.toFixed(1);
+}
+
+// ═══════════════════════════════════════════════
+// ORDEM PARANORMAL
+// ═══════════════════════════════════════════════
+function adicionarRitual() {
+  rituais.push({ nome:'', desc:'' });
+  renderRituais(); salvarLocal();
+}
+function renderRituais() {
+  const cont = document.getElementById('rituaisLista');
+  if (!cont) return;
+  cont.innerHTML = rituais.map((r,i) => `
+    <div class="poder-item">
+      <div class="poder-header">
+        <input type="text" class="poder-nome-input" value="${r.nome||''}" placeholder="Nome do ritual"
+               oninput="rituais[${i}].nome=this.value;salvarLocal()" style="flex:1">
+        <button class="btn-icon danger" onclick="rituais.splice(${i},1);renderRituais();salvarLocal()">✕</button>
+      </div>
+      <textarea class="poder-desc" placeholder="Efeito, custo de PE, tempo de execução..."
+                oninput="rituais[${i}].desc=this.value;salvarLocal()"
+                style="width:100%;margin-top:5px;min-height:40px">${r.desc||''}</textarea>
+    </div>
+  `).join('');
+}
+function adicionarParanormal() {
+  paranormals.push({ nome:'', desc:'' });
+  renderParanormal(); salvarLocal();
+}
+function renderParanormal() {
+  const cont = document.getElementById('paranormalLista');
+  if (!cont) return;
+  cont.innerHTML = paranormals.map((p,i) => `
+    <div class="poder-item">
+      <div class="poder-header">
+        <input type="text" class="poder-nome-input" value="${p.nome||''}" placeholder="Poder paranormal"
+               oninput="paranormals[${i}].nome=this.value;salvarLocal()" style="flex:1">
+        <button class="btn-icon danger" onclick="paranormals.splice(${i},1);renderParanormal();salvarLocal()">✕</button>
+      </div>
+      <textarea class="poder-desc" placeholder="Descrição do poder..."
+                oninput="paranormals[${i}].desc=this.value;salvarLocal()"
+                style="width:100%;margin-top:5px;min-height:40px">${p.desc||''}</textarea>
+    </div>
+  `).join('');
+}
+
+
+// ═══════════════════════════════════════════════
+// NAVEGAÇÃO ENTRE ABAS PRINCIPAIS
+// ═══════════════════════════════════════════════
+function trocarFichaPage(id, btn) {
+  document.querySelectorAll('.ficha-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ficha-main-tab').forEach(b => b.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+function ajustarSan(delta) {
+  const el = document.getElementById('sanAtual');
+  const max = parseInt(document.getElementById('sanMax').value || 0);
+  el.value = Math.max(0, Math.min(max, parseInt(el.value || 0) + delta));
+  document.getElementById('sanDisplay').textContent = el.value;
+  salvarLocal();
+}
+
+// ═══════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════
+function abrirTab(id, btn) {
+  const secao = btn.closest('.secao-body') || btn.closest('.tab-bar').parentElement;
+  secao.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  secao.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('tab-'+id);
+  if (target) target.classList.add('active');
+  btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════
+// TOGGLE SEÇÃO
+// ═══════════════════════════════════════════════
+function toggleSecao(titleEl) {
+  titleEl.closest('.secao').classList.toggle('collapsed');
+}
+
+// ═══════════════════════════════════════════════
+// AVATAR
+// ═══════════════════════════════════════════════
+function setupAvatar() {
+  const btn = document.getElementById('avatarBtn');
+  const input = document.getElementById('avatarInput');
+  btn.addEventListener('click', () => input.click());
+  input.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      btn.innerHTML = `<img src="${ev.target.result}" alt="avatar">`;
+      salvarLocal();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// SALVAR / CARREGAR
+// ═══════════════════════════════════════════════
+function coletarDados() {
+  const campos = ['nomeChar','nivelChar','origemChar',
+    'tendenciaChar','tamanhoChar','deslocamento','idiomas','xpChar',
+    'pvAtual','pvMax','peAtual','peMax','defTotal','fortitude','reflexos','vontade',
+    'tradicaoMagica','attrConjuracao','dinheiro','historiaText','notasText','aliadosText',
+    'nexValor','opAgente','opClasse','opNivel','opEspacos','sanAtual','sanMax','traumasText'];
+  const data = {};
+  campos.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) data[id] = el.value;
+  });
+  ATRIBUTOS.forEach(a => {
+    const el = document.getElementById(`${a.id}-val`);
+    if (el) data[`${a.id}-val`] = el.value;
+  });
+  // Perícias
+  data.pericias = PERICIAS_T20.map((_,i) => ({
+    treinado: document.getElementById(`p${i}-t`)?.checked,
+    attr: document.getElementById(`p${i}-a`)?.value,
+    outros: document.getElementById(`p${i}-o`)?.value,
+  }));
+  // Selects com homebrew (racaChar, classeChar, origemChar, divindadeChar)
+  ['racaChar','classeChar','origemChar','divindadeChar'].forEach(id => {
+    const sel = document.getElementById(id);
+    const inp = document.getElementById(id + '_custom');
+    if (sel) data[id] = sel.value;
+    if (inp) data[id + '_custom'] = inp.value;
+  });
+  // Avatar
+  const av = document.getElementById('avatarBtn');
+  const img = av.querySelector('img');
+  if (img) data._avatar = img.src;
+  data._ataques = ataques;
+  data._poderes = poderes;
+  data._magias = magiasCirculos;
+  data._inventario = inventario;
+  data._rituais = rituais;
+  data._paranormals = paranormals;
+  return data;
+}
+
+function aplicarDados(data) {
+  const CUSTOM_SELECTS = ['racaChar','classeChar','origemChar','divindadeChar'];
+  Object.entries(data).forEach(([id, val]) => {
+    if (id.startsWith('_') || id === 'pericias') return;
+    if (CUSTOM_SELECTS.some(cs => id === cs + '_custom')) return; // tratado abaixo
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+  // Restaurar selects com homebrew
+  CUSTOM_SELECTS.forEach(id => {
+    const customVal = data[id + '_custom'] || '';
+    const selVal = data[id] || '';
+    const sel = document.getElementById(id);
+    const inp = document.getElementById(id + '_custom');
+    if (!sel) return;
+    if (selVal === '__custom__' && customVal) {
+      sel.value = '__custom__';
+      if (inp) { inp.value = customVal; inp.classList.add('visible'); }
+    } else if (selVal) {
+      sel.value = selVal;
+      if (inp) inp.classList.remove('visible');
+    }
+  });
+  // Atualizar displays
+  const nxv = document.getElementById('nexValor');
+  const nxd = document.getElementById('nexDisplay');
+  if (nxv && nxd) nxd.textContent = nxv.value + '%';
+  const sanA = document.getElementById('sanAtual');
+  const sanD = document.getElementById('sanDisplay');
+  if (sanA && sanD) sanD.textContent = sanA.value;
+  if (data._avatar) {
+    const btn = document.getElementById('avatarBtn');
+    btn.innerHTML = `<img src="${data._avatar}" alt="avatar">`;
+  }
+  if (data.pericias) {
+    data.pericias.forEach((p, i) => {
+      const t = document.getElementById(`p${i}-t`); if (t) t.checked = p.treinado;
+      const a = document.getElementById(`p${i}-a`); if (a) a.value = p.attr;
+      const o = document.getElementById(`p${i}-o`); if (o) o.value = p.outros;
+    });
+  }
+  ataques = data._ataques || [];
+  poderes = data._poderes || [];
+  magiasCirculos = data._magias || [];
+  inventario = data._inventario || [];
+  rituais = data._rituais || [];
+  paranormals = data._paranormals || [];
+  renderAtaques(); renderPoderes(); renderMagias();
+  renderInventario(); renderRituais(); renderParanormal();
+  recalcularTudo(); calcularPesoTotal();
+}
+
+function salvarLocal() {
+  try {
+    localStorage.setItem('fichaT20', JSON.stringify(coletarDados()));
+  } catch(e) {}
+}
+function carregarLocal() {
+  try {
+    const raw = localStorage.getItem('fichaT20');
+    if (raw) aplicarDados(JSON.parse(raw));
+    else recalcularTudo();
+  } catch(e) { recalcularTudo(); }
+}
+function exportarJSON() {
+  const blob = new Blob([JSON.stringify(coletarDados(), null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const nome = document.getElementById('nomeChar').value || 'personagem';
+  a.download = `ficha_${nome.replace(/\s+/g,'_')}.json`;
+  a.click();
+}
+function importarJSON() {
+  const input = document.getElementById('importInput');
+  input.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try { aplicarDados(JSON.parse(ev.target.result)); }
+      catch(err) { alert('Erro ao importar ficha: ' + err.message); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function limparFicha() {
+  if (!confirm('Limpar toda a ficha? Isso não pode ser desfeito.')) return;
+  localStorage.removeItem('fichaT20');
+  ataques=[]; poderes=[]; magiasCirculos=[]; inventario=[]; rituais=[]; paranormals=[];
+  document.getElementById('fichaRoot').querySelectorAll('input,select,textarea').forEach(el => {
+    if (el.type === 'checkbox') el.checked = false;
+    else if (el.type !== 'file') el.value = el.defaultValue || '';
+  });
+  document.getElementById('avatarBtn').innerHTML = '🧙<input type="file" id="avatarInput" accept="image/*" style="display:none">';
+  setupAvatar();
+  renderAtaques(); renderPoderes(); renderMagias(); renderInventario();
+  recalcularTudo();
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
