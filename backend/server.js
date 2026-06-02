@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
 const PORT = 3000;
-let usuarios = [];
+const supabase = require('./supabase');
 
 app.use(express.json());
 
@@ -15,14 +15,16 @@ app.get('/', (req, res) => {
 // Rota de cadastro de usuário
 app.post('/cadastro', async (req, res) => {
     const { nome, email, senha} = req.body;
-
-    if (usuarios.find(usuario => usuario.email === email)) {
-        return res.status(400).json({ message: 'Email já cadastrado!' });
+    
+    const hash = await bcrypt.hash(senha, 10)
+    const { data, error } = await supabase
+        .from('usuarios')
+        .insert({ nome, email, senha: hash })
+    
+    if (error) {
+        res.status(500).json({ message: 'Erro ao cadastrar usupário!', error});
     } else {
-        const hash = await bcrypt.hash(senha, 10);
-        usuarios.push({ nome, email, senha: hash });
-        console.log('Usuário cadastrado: ', nome, email);
-        res.json({ message: 'Cadastro recebido com sucesso!'});
+        res.status(200).json({ message: 'Usuário cadastrado: ', nome, email} );
     }
 
 
@@ -31,17 +33,21 @@ app.post('/cadastro', async (req, res) => {
 // Rota de login de usuário
 app.post('/login', async (req, res) => {
     const {email, senha} = req.body;
-    const usuarioLogado = usuarios.find(usuario => usuario.email === email);
+    const {data, error} = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('email', email)
+        .single();
 
-    if (!usuarioLogado) {
-        return res.status(400).json({ message: 'Email não encontrado!'});
+    if (error || data.length === 0) {
+        res.status(401).json({ message: 'Email ou senha inválidos!'});
     } else {
-        const senhaValida = await bcrypt.compare(senha, usuarioLogado.senha);
+        const usuario = data;
+        const senhaValida = await bcrypt.compare(senha, usuario.senha);
         if (senhaValida) {
-            console.log('Usuário logado: ', usuarioLogado.nome, usuarioLogado.email);
-            res.json({ message: 'Login bem-sucedido!'});
+            res.status(200).json({ message: 'Login bem-sucedido!', usuario: { nome: usuario.nome, email: usuario.email } });
         } else {
-            res.status(400).json({ message: 'Senha incorreta!'});
+            res.status(401).json({ message: 'Email ou senha inválidos!' });
         }
     }
 })
