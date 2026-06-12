@@ -584,3 +584,78 @@ body, html {
     width: 44px;
     font-size: 15px;
 }
+/* ============================================================
+   JANELA DE COMBATE (independente do overlay-screen)
+   ============================================================ */
+#combate-screen {
+    position: fixed;
+    top: 70px;
+    left: 80px;
+    width: 320px;
+    height: 540px;
+    min-width: 260px;
+    min-height: 300px;
+    background: rgba(14, 12, 10, 0.97);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+    box-shadow: 0 0 40px rgba(0,0,0,0.9), 0 0 0 1px rgba(212,175,55,0.1);
+    overflow: hidden;
+}
+
+#combate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: rgba(212, 175, 55, 0.08);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    cursor: grab;
+    user-select: none;
+    flex-shrink: 0;
+}
+#combate-header:active { cursor: grabbing; }
+
+#combate-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #d4af37;
+}
+
+#combate-header button {
+    background: rgba(180, 50, 50, 0.3);
+    border: 1px solid rgba(200, 60, 60, 0.4);
+    color: #e88;
+    font-size: 18px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+}
+#combate-header button:hover {
+    background: rgba(200, 60, 60, 0.5);
+    color: white;
+}
+
+#combate-conteudo {
+    flex: 1;
+    overflow: hidden;
+}
+
+#combate-screen .resizer { position: absolute; background: transparent; z-index: 25; }
+#combate-screen .resizer.n  { top: -5px;    left: 0;    width: 100%; height: 10px; cursor: n-resize; }
+#combate-screen .resizer.s  { bottom: -5px; left: 0;    width: 100%; height: 10px; cursor: s-resize; }
+#combate-screen .resizer.e  { right: -5px;  top: 0;     width: 10px; height: 100%; cursor: e-resize; }
+#combate-screen .resizer.w  { left: -5px;   top: 0;     width: 10px; height: 100%; cursor: w-resize; }
+#combate-screen .resizer.ne { top: -5px;    right: -5px;  width: 15px; height: 15px; cursor: ne-resize; }
+#combate-screen .resizer.nw { top: -5px;    left: -5px;   width: 15px; height: 15px; cursor: nw-resize; }
+#combate-screen .resizer.se { bottom: -5px; right: -5px;  width: 15px; height: 15px; cursor: se-resize; }
+#combate-screen .resizer.sw { bottom: -5px; left: -5px;   width: 15px; height: 15px; cursor: sw-resize; }

@@ -1,17 +1,88 @@
-// ═══════════════════════════════════════════════
-// TRACKER DE COMBATE
-// ═══════════════════════════════════════════════
-let combateVisivel = false;
+// =============================================================================
+// JANELA DE COMBATE (independente)
+// =============================================================================
+const combateEl = document.getElementById('combate-screen');
+const combateHeader = document.getElementById('combate-header');
 
-function toggleCombate() {
-    combateVisivel = !combateVisivel;
+function abrirCombate() {
+    const win = document.getElementById('combate-screen');
+    win.classList.remove('hidden');
+    // Injeta funções do chat no iframe
     const iframe = document.getElementById('combateIframe');
     if (iframe) {
-        iframe.style.pointerEvents = combateVisivel ? 'auto' : 'none';
-        iframe.style.opacity = combateVisivel ? '1' : '0';
-        iframe.style.transition = 'opacity 0.25s';
+        iframe.addEventListener('load', () => {
+            try {
+                const iw = iframe.contentWindow;
+                iw.adicionarMensagemChat = adicionarMensagemChat;
+                iw.animarDado3D = animarDado3D;
+            } catch(e) {}
+        });
+        // Se já carregou, injeta agora
+        try {
+            const iw = iframe.contentWindow;
+            if (iw.document.readyState === 'complete') {
+                iw.adicionarMensagemChat = adicionarMensagemChat;
+                iw.animarDado3D = animarDado3D;
+            }
+        } catch(e) {}
     }
 }
+
+function fecharCombate() {
+    document.getElementById('combate-screen').classList.add('hidden');
+}
+
+// Arrastar a janela de combate
+document.addEventListener('DOMContentLoaded', () => {
+    const win = document.getElementById('combate-screen');
+    const hdr = document.getElementById('combate-header');
+    if (!win || !hdr) return;
+
+    function prepCombate() {
+        const rect = win.getBoundingClientRect();
+        win.style.transform = 'none';
+        win.style.top  = rect.top  + 'px';
+        win.style.left = rect.left + 'px';
+        win.style.width  = win.offsetWidth  + 'px';
+        win.style.height = win.offsetHeight + 'px';
+    }
+
+    hdr.onmousedown = function(e) {
+        if (e.target.tagName === 'BUTTON') return;
+        prepCombate();
+        let p1=0,p2=0,p3=e.clientX,p4=e.clientY;
+        document.onmousemove = function(e) {
+            p1 = p3 - e.clientX; p2 = p4 - e.clientY;
+            p3 = e.clientX;      p4 = e.clientY;
+            win.style.top  = (win.offsetTop  - p2) + 'px';
+            win.style.left = (win.offsetLeft - p1) + 'px';
+        };
+        document.onmouseup = () => { document.onmousemove = null; };
+    };
+
+    // Redimensionar
+    win.querySelectorAll('.resizer').forEach(resizer => {
+        resizer.onmousedown = function(e) {
+            e.preventDefault();
+            prepCombate();
+            let px = e.clientX, py = e.clientY;
+            window.onmousemove = function(e) {
+                const rect = win.getBoundingClientRect();
+                if (resizer.classList.contains('e'))  { win.style.width  = rect.width  + (e.clientX - px) + 'px'; }
+                if (resizer.classList.contains('s'))  { win.style.height = rect.height + (e.clientY - py) + 'px'; }
+                if (resizer.classList.contains('w'))  { win.style.width  = rect.width  - (e.clientX - px) + 'px'; win.style.left = rect.left + (e.clientX - px) + 'px'; }
+                if (resizer.classList.contains('n'))  { win.style.height = rect.height - (e.clientY - py) + 'px'; win.style.top  = rect.top  + (e.clientY - py) + 'px'; }
+                if (resizer.classList.contains('se')) { win.style.width  = rect.width  + (e.clientX - px) + 'px'; win.style.height = rect.height + (e.clientY - py) + 'px'; }
+                if (resizer.classList.contains('sw')) { win.style.width  = rect.width  - (e.clientX - px) + 'px'; win.style.left = rect.left + (e.clientX - px) + 'px'; win.style.height = rect.height + (e.clientY - py) + 'px'; }
+                if (resizer.classList.contains('ne')) { win.style.width  = rect.width  + (e.clientX - px) + 'px'; win.style.height = rect.height - (e.clientY - py) + 'px'; win.style.top = rect.top + (e.clientY - py) + 'px'; }
+                if (resizer.classList.contains('nw')) { win.style.width  = rect.width  - (e.clientX - px) + 'px'; win.style.left = rect.left + (e.clientX - px) + 'px'; win.style.height = rect.height - (e.clientY - py) + 'px'; win.style.top = rect.top + (e.clientY - py) + 'px'; }
+                px = e.clientX; py = e.clientY;
+            };
+            window.onmouseup = () => { window.onmousemove = null; };
+        };
+    });
+});
+
 
 // =============================================================================
 // 1. ESTADO GLOBAL
@@ -121,9 +192,9 @@ function animarDado3D(lados, resultado) {
     const diceEl = document.getElementById('dice3d');
 
     // Randomiza rotações para parecer que está girando de verdade
-    const rx = 360 * 3 + Math.floor(Math.random() * 360);
-    const ry = 360 * 4 + Math.floor(Math.random() * 360);
-    const rz = 360 * 2 + Math.floor(Math.random() * 360);
+    const rx = 360 * 3 ;
+    const ry = 360 * 4 ;
+    const rz = 360 * 2 ;
     diceEl.style.transition = 'none';
     diceEl.style.transform = 'rotateX(0deg) rotateY(0deg) rotateZ(0deg)';
     void diceEl.offsetWidth;

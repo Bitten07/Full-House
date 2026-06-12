@@ -39,7 +39,7 @@
                 <span class="icon">💬</span>
                 <span class="text">Chat / Dados</span>
             </li>
-            <li class="nav-button" onclick="toggleCombate()">
+            <li class="nav-button" onclick="abrirCombate()">
                 <span class="icon">⚔️</span>
                 <span class="text">Combate</span>
             </li>
@@ -61,6 +61,27 @@
             <button onclick="fecharJanela()">×</button>
         </div>
         <div id="conteudo-dinamico"></div>
+    </div>
+
+    <!-- JANELA DE COMBATE (independente) -->
+    <div id="combate-screen" class="hidden">
+        <div class="resizer n"></div>
+        <div class="resizer s"></div>
+        <div class="resizer e"></div>
+        <div class="resizer w"></div>
+        <div class="resizer ne"></div>
+        <div class="resizer nw"></div>
+        <div class="resizer se"></div>
+        <div class="resizer sw"></div>
+        <div id="combate-header">
+            <span id="combate-title">⚔️ COMBATE</span>
+            <button onclick="fecharCombate()">×</button>
+        </div>
+        <div id="combate-conteudo">
+            <iframe id="combateIframe" src="combate.html"
+                style="width:100%;height:100%;border:none;background:transparent;"
+                title="Tracker de Combate"></iframe>
+        </div>
     </div>
 
     <!-- CHAT / LOG DE ROLAGENS -->
@@ -90,11 +111,6 @@
         </div>
         <div id="dice3d-label">D20</div>
     </div>
-
-    <!-- TRACKER DE COMBATE -->
-    <iframe id="combateIframe" src="combate.html"
-        style="position:fixed;inset:0;width:100%;height:100%;border:none;z-index:15;pointer-events:none;"
-        title="Tracker de Combate" id="combateFrame"></iframe>
 
     <script src="script.js"></script>
 </body>
