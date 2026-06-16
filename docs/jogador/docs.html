@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lore & Documentos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold:       #d4af37;
+  --gold-dim:   rgba(212,175,55,.13);
+  --gold-bd:    rgba(212,175,55,.22);
+  --gold-text:  #e8d5a3;
+  --ink:        #0c0a08;
+  --ink2:       #121008;
+  --ink3:       #1a1710;
+  --ink4:       #222018;
+  --text:       #d0c4a8;
+  --text-dim:   #6a5e48;
+  --red:        #c0392b;
+  --red-dim:    rgba(192,57,43,.14);
+  --teal:       #0d9488;
+  --teal-dim:   rgba(13,148,136,.12);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  font-size: 14px;
+}
+
+/* ══ LAYOUT ══ */
+#app {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 48px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ══ TOPBAR ══ */
+#topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  background: var(--ink2);
+  border-bottom: 1px solid var(--gold-bd);
+  z-index: 10;
+}
+
+#topbar-title {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+#search-box {
+  flex: 1;
+  max-width: 320px;
+  background: rgba(0,0,0,.35);
+  border: 1px solid var(--gold-bd);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  font-size: 13px;
+  border-radius: 6px;
+  padding: 5px 10px 5px 30px;
+  outline: none;
+  transition: border-color .15s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236a5e48' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 9px center;
+}
+#search-box:focus { border-color: var(--gold); }
+#search-box::placeholder { color: var(--text-dim); }
+
+.tb-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  display: flex; align-items: center; gap: 5px;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.tb-btn:hover { color: var(--gold); border-color: var(--gold-bd); background: var(--gold-dim); }
+.tb-btn.primary { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+.tb-btn.primary:hover { background: rgba(212,175,55,.22); }
+
+/* ══ SIDEBAR ESQUERDA ══ */
+#sidebar {
+  border-right: 1px solid var(--gold-bd);
+  background: var(--ink2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--gold-bd);
+  flex-shrink: 0;
+}
+#sidebar-header span {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 2.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.icon-btn {
+  background: none; border: none;
+  color: var(--text-dim); cursor: pointer;
+  font-size: 14px; padding: 2px 5px;
+  border-radius: 4px; transition: all .15s;
+}
+.icon-btn:hover { color: var(--gold); background: var(--gold-dim); }
+
+#folders-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-bd) transparent;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .15s;
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  position: relative;
+  margin-bottom: 2px;
+}
+.folder-item:hover { background: var(--gold-dim); color: var(--text); border-color: var(--gold-bd); }
+.folder-item.active { background: var(--gold-dim); color: var(--gold); border-color: var(--gold-bd); }
+.folder-item .folder-icon { font-size: 14px; flex-shrink: 0; }
+.folder-item .folder-count {
+  margin-left: auto;
+  font-size: 9px;
+  background: rgba(212,175,55,.1);
+  border: 1px solid var(--gold-bd);
+  color: var(--text-dim);
+  border-radius: 10px;
+  padding: 1px 6px;
+}
+.folder-item.active .folder-count { color: var(--gold); }
+
+.folder-edit-btn {
+  opacity: 0;
+  background: none; border: none;
+  color: var(--text-dim); cursor: pointer;
+  font-size: 11px; padding: 1px 3px;
+  border-radius: 3px; transition: all .15s;
+  flex-shrink: 0;
+}
+.folder-item:hover .folder-edit-btn { opacity: 1; }
+.folder-edit-btn:hover { color: var(--red); }
+
+#sidebar-tags {
+  border-top: 1px solid var(--gold-bd);
+  padding: 8px;
+  flex-shrink: 0;
+}
+#sidebar-tags-title {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+#tags-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.tag-chip {
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--gold-bd);
+  color: var(--text-dim);
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: 'Crimson Pro', serif;
+}
+.tag-chip:hover { border-color: var(--gold); color: var(--gold-text); }
+.tag-chip.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+
+/* ══ ÁREA PRINCIPAL ══ */
+#main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+/* subheader breadcrumb */
+#main-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--gold-bd);
+  background: var(--ink2);
+  flex-shrink: 0;
+}
+#breadcrumb {
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  flex: 1;
+}
+#breadcrumb span { color: var(--gold); }
+
+.view-btn {
+  background: none; border: 1px solid transparent;
+  color: var(--text-dim); cursor: pointer;
+  border-radius: 5px; padding: 4px 7px; font-size: 14px;
+  transition: all .15s;
+}
+.view-btn:hover, .view-btn.active { color: var(--gold); border-color: var(--gold-bd); background: var(--gold-dim); }
+
+/* ══ GRID DE DOCS ══ */
+#docs-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-bd) transparent;
+}
+
+/* Grid view */
+#docs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+/* List view */
+#docs-grid.list-view {
+  grid-template-columns: 1fr;
+  gap: 4px;
+}
+
+.doc-card {
+  background: var(--ink2);
+  border: 1px solid var(--gold-bd);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+  animation: cardIn .2s ease;
+}
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.doc-card:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 16px var(--gold-dim), 0 4px 12px rgba(0,0,0,.5);
+  transform: translateY(-2px);
+}
+.doc-card.list-view {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  transform: none !important;
+}
+.doc-card.list-view:hover { transform: none !important; }
+
+/* thumbnail */
+.doc-thumb {
+  height: 90px;
+  background: var(--ink3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.doc-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: .85;
+}
+.doc-thumb .doc-type-badge {
+  position: absolute;
+  top: 5px; right: 5px;
+  background: rgba(0,0,0,.7);
+  border: 1px solid var(--gold-bd);
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-family: 'Cinzel', serif;
+  font-size: 7px;
+  letter-spacing: 1px;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+/* list thumb */
+.doc-thumb-sm {
+  width: 36px; height: 36px;
+  background: var(--ink3);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.doc-thumb-sm img { width:100%;height:100%;object-fit:cover;border-radius:4px; }
+
+.doc-info {
+  padding: 8px 9px 9px;
+}
+.doc-info.list { padding: 0; }
+
+.doc-name {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--gold-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.doc-meta {
+  font-size: 10px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.doc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 5px;
+}
+.doc-tag {
+  background: rgba(212,175,55,.07);
+  border: 1px solid var(--gold-bd);
+  color: var(--text-dim);
+  border-radius: 8px;
+  padding: 1px 6px;
+  font-size: 9px;
+  font-family: 'Crimson Pro', serif;
+}
+
+.doc-actions {
+  display: flex; gap: 3px;
+  opacity: 0;
+  transition: opacity .15s;
+}
+.doc-card:hover .doc-actions { opacity: 1; }
+.doc-action-btn {
+  background: none; border: 1px solid var(--gold-bd);
+  color: var(--text-dim); border-radius: 4px;
+  width: 24px; height: 24px; cursor: pointer;
+  font-size: 11px; transition: all .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.doc-action-btn:hover { color: var(--gold); border-color: var(--gold); }
+.doc-action-btn.danger:hover { color: #e07070; border-color: var(--red); }
+
+/* empty state */
+#empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 10px;
+  color: var(--text-dim);
+  padding: 40px;
+}
+#empty-state .empty-icon { font-size: 48px; opacity: .4; }
+#empty-state p {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-align: center;
+  opacity: .6;
+}
+
+/* ══ VIEWER (painel direito ao abrir doc) ══ */
+#viewer-panel {
+  position: fixed;
+  right: -500px;
+  top: 0;
+  width: 480px;
+  height: 100vh;
+  background: var(--ink2);
+  border-left: 1px solid var(--gold-bd);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  transition: right .3s cubic-bezier(.4,0,.2,1);
+  box-shadow: -8px 0 32px rgba(0,0,0,.6);
+}
+#viewer-panel.open { right: 0; }
+
+#viewer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--gold-bd);
+  background: rgba(212,175,55,.04);
+  flex-shrink: 0;
+}
+#viewer-title {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#viewer-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+#viewer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-bd) transparent;
+}
+#viewer-content img {
+  max-width: 100%;
+  border-radius: 6px;
+  border: 1px solid var(--gold-bd);
+}
+#viewer-content iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  border: none;
+  border-radius: 6px;
+}
+
+/* nota editor */
+.note-editor {
+  width: 100%;
+  min-height: 280px;
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--gold-bd);
+  color: var(--text);
+  font-family: 'IM Fell English', serif;
+  font-size: 14px;
+  line-height: 1.7;
+  border-radius: 6px;
+  padding: 12px;
+  resize: vertical;
+  outline: none;
+  transition: border-color .15s;
+}
+.note-editor:focus { border-color: var(--gold); }
+
+.viewer-meta {
+  padding: 10px 14px;
+  border-top: 1px solid var(--gold-bd);
+  background: var(--ink2);
+  flex-shrink: 0;
+}
+.viewer-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.viewer-meta-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  min-width: 56px;
+}
+.viewer-tag-input {
+  flex: 1;
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--gold-bd);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  font-size: 12px;
+  border-radius: 4px;
+  padding: 3px 8px;
+  outline: none;
+}
+.viewer-tag-input:focus { border-color: var(--gold); }
+.viewer-folder-sel {
+  flex: 1;
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--gold-bd);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif;
+  font-size: 12px;
+  border-radius: 4px;
+  padding: 3px 8px;
+  outline: none;
+  cursor: pointer;
+}
+.viewer-folder-sel option { background: var(--ink2); }
+
+/* ══ MODAIS ══ */
+#modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+}
+#modal-overlay.open { display: flex; }
+
+.modal-box {
+  background: var(--ink2);
+  border: 1px solid var(--gold-bd);
+  border-radius: 10px;
+  width: 360px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,.9);
+  animation: modalIn .2s ease;
+}
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.94) translateY(-8px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+.modal-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--gold-bd);
+  background: rgba(212,175,55,.04);
+}
+.modal-hdr span {
+  font-family: 'Cinzel', serif; font-size: 10px;
+  letter-spacing: 2.5px; color: var(--gold);
+}
+.modal-close {
+  background: none; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 18px; line-height: 1;
+  transition: color .15s;
+}
+.modal-close:hover { color: var(--red); }
+
+.modal-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.modal-field { display: flex; flex-direction: column; gap: 4px; }
+.modal-field label {
+  font-family: 'Cinzel', serif; font-size: 8px;
+  letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase;
+}
+.modal-field input, .modal-field select, .modal-field textarea {
+  background: rgba(0,0,0,.4);
+  border: 1px solid rgba(212,175,55,.2);
+  color: var(--text);
+  font-family: 'Crimson Pro', serif; font-size: 13px;
+  border-radius: 5px; padding: 6px 10px;
+  outline: none; transition: border-color .15s;
+  width: 100%;
+}
+.modal-field input:focus, .modal-field select:focus,
+.modal-field textarea:focus { border-color: var(--gold); }
+.modal-field select option { background: var(--ink2); }
+
+.modal-footer {
+  display: flex; gap: 8px; justify-content: flex-end;
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--gold-bd);
+}
+.btn-cancel {
+  background: none; border: 1px solid rgba(212,175,55,.2);
+  color: var(--text-dim); font-family: 'Cinzel', serif;
+  font-size: 9px; letter-spacing: 1.5px; padding: 7px 14px;
+  border-radius: 5px; cursor: pointer; transition: all .15s;
+}
+.btn-cancel:hover { border-color: var(--gold-bd); color: var(--text); }
+.btn-confirm {
+  background: rgba(212,175,55,.12); border: 1px solid var(--gold);
+  color: var(--gold); font-family: 'Cinzel', serif;
+  font-size: 9px; letter-spacing: 1.5px; padding: 7px 14px;
+  border-radius: 5px; cursor: pointer; transition: all .15s;
+}
+.btn-confirm:hover { background: rgba(212,175,55,.22); }
+
+/* upload zone */
+.upload-zone {
+  border: 2px dashed var(--gold-bd);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+  color: var(--gold-text);
+}
+.upload-zone .upload-icon { font-size: 28px; margin-bottom: 6px; }
+
+/* icon-based type colors */
+.type-note   { color: #f59e0b; }
+.type-image  { color: #10b981; }
+.type-pdf    { color: #ef4444; }
+.type-link   { color: #3b82f6; }
+.type-other  { color: #8b5cf6; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══ TOPBAR ══ -->
+  <div id="topbar">
+    <span id="topbar-title">📖 LORE & DOCS</span>
+    <input type="text" id="search-box" placeholder="Buscar documentos, tags..." oninput="filtrar()">
+    <div style="margin-left:auto;display:flex;gap:6px">
+      <button class="tb-btn" onclick="abrirModalNota()">✏️ Nova nota</button>
+      <button class="tb-btn primary" onclick="document.getElementById('file-upload-input').click()">⬆ Upload</button>
+    </div>
+  </div>
+
+  <!-- ══ SIDEBAR ══ -->
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <span>📁 Pastas</span>
+      <button class="icon-btn" onclick="abrirModalPasta()" title="Nova pasta">＋</button>
+    </div>
+    <div id="folders-list">
+      <div class="folder-item active" data-folder="all" onclick="selecionarPasta('all',this)">
+        <span class="folder-icon">🗂️</span>
+        <span>Todos</span>
+        <span class="folder-count" id="count-all">0</span>
+      </div>
+      <!-- pastas geradas dinamicamente -->
+    </div>
+    <div id="sidebar-tags">
+      <div id="sidebar-tags-title">🏷 Tags</div>
+      <div id="tags-cloud"></div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN ══ -->
+  <div id="main">
+    <div id="main-header">
+      <span id="breadcrumb">TODOS OS DOCUMENTOS</span>
+      <div style="display:flex;gap:4px;margin-left:auto">
+        <button class="view-btn active" id="btn-grid-view" onclick="setView('grid')" title="Grade">⊞</button>
+        <button class="view-btn" id="btn-list-view" onclick="setView('list')" title="Lista">☰</button>
+      </div>
+    </div>
+    <div id="docs-container">
+      <div id="docs-grid"></div>
+      <div id="empty-state" style="display:none">
+        <div class="empty-icon">📜</div>
+        <p>NENHUM DOCUMENTO AQUI</p>
+        <p style="font-size:10px;margin-top:4px">Crie uma nota ou faça upload de um arquivo</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- fim app -->
+
+<!-- ══ VIEWER PANEL ══ -->
+<div id="viewer-panel">
+  <div id="viewer-header">
+    <span id="viewer-title">—</span>
+    <button class="icon-btn" onclick="salvarDoc()" title="Salvar">💾</button>
+    <button class="icon-btn" onclick="fecharViewer()" title="Fechar">✕</button>
+  </div>
+  <div id="viewer-body">
+    <div id="viewer-content"></div>
+    <div class="viewer-meta">
+      <div class="viewer-meta-row">
+        <span class="viewer-meta-label">PASTA</span>
+        <select class="viewer-folder-sel" id="viewer-folder-sel" onchange="onViewerFolderChange()"></select>
+      </div>
+      <div class="viewer-meta-row">
+        <span class="viewer-meta-label">TAGS</span>
+        <input class="viewer-tag-input" id="viewer-tags-input"
+               placeholder="tag1, tag2, tag3..." oninput="onViewerTagsInput()">
+      </div>
+      <div class="viewer-meta-row">
+        <span class="viewer-meta-label">VISÍVEL</span>
+        <select id="viewer-visibility" onchange="onViewerVisibilityChange()" style="flex:1;background:rgba(0,0,0,.3);border:1px solid var(--gold-bd);color:var(--text);font-family:'Crimson Pro',serif;font-size:12px;border-radius:4px;padding:3px 8px;outline:none;cursor:pointer">
+          <option value="todos">🌐 Todos</option>
+          <option value="mestre">🔒 Só Mestre</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAIS ══ -->
+
+<!-- Modal nova pasta -->
+<div id="modal-overlay">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-hdr">
+      <span id="modal-title">NOVA PASTA</span>
+      <button class="modal-close" onclick="fecharModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-confirm" id="modal-confirm" onclick="confirmarModal()">Criar</button>
+    </div>
+  </div>
+</div>
+
+<!-- inputs ocultos -->
+<input type="file" id="file-upload-input" accept="image/*,.pdf,.txt,.md" multiple style="display:none">
+
+<script>
+// ═══════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════
+let docs    = [];   // { id, nome, tipo, pasta, tags, conteudo, dataCriacao, dataEdit, visibility:'mestre' }
+let pastas  = [];   // { id, nome, icone, cor }
+let docIdCounter = 1;
+let pastaIdCounter = 1;
+
+let pastaAtiva   = 'all';
+let tagAtiva     = null;
+let viewMode     = 'grid';
+let viewerDocId  = null;
+let modalMode    = null; // 'pasta' | 'nota'
+let editPastaId  = null;
+
+const PASTA_ICONS = ['📁','📂','🗺️','👤','⚔️','🔮','📜','🏰','🌿','🐉','💀','⚗️','🎭','📿','🧩'];
+const PASTA_CORES = ['#d4af37','#e74c3c','#3b82c4','#16a34a','#8b5cf6','#f97316','#ec4899','#06b6d4'];
+
+// Pastas padrão
+const PASTAS_PADRAO = [
+  { id:'p1', nome:'NPCs',      icone:'👤', cor:'#d4af37' },
+  { id:'p2', nome:'Mapas',     icone:'🗺️', cor:'#3b82c4' },
+  { id:'p3', nome:'Lore',      icone:'📜', cor:'#8b5cf6' },
+  { id:'p4', nome:'Regras',    icone:'⚔️', cor:'#e74c3c' },
+  { id:'p5', nome:'Missões',   icone:'🏰', cor:'#16a34a' },
+];
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+function init() {
+  carregarLocal();
+  if (pastas.length === 0) pastas = PASTAS_PADRAO.map(p => ({...p}));
+  renderSidebar();
+  renderDocs();
+  setupUpload();
+}
+
+// ═══════════════════════════════════════════════
+// SALVAR / CARREGAR
+// ═══════════════════════════════════════════════
+function salvarLocal() {
+  try {
+    // Salva metadados (sem conteúdo de imagem/PDF para não exceder localStorage)
+    const metaDocs = docs.map(d => ({
+      ...d,
+      // Imagens e PDFs: guardar só se forem nota de texto
+      conteudo: (d.tipo === 'note' || d.tipo === 'link') ? d.conteudo : d.conteudo,
+    }));
+    localStorage.setItem('rpgDocs',   JSON.stringify(metaDocs));
+    localStorage.setItem('rpgPastas', JSON.stringify(pastas));
+    localStorage.setItem('rpgDocIdCounter',   String(docIdCounter));
+    localStorage.setItem('rpgPastaIdCounter', String(pastaIdCounter));
+  } catch(e) { console.warn('localStorage cheio:', e); }
+}
+
+function carregarLocal() {
+  try {
+    const d = localStorage.getItem('rpgDocs');
+    const p = localStorage.getItem('rpgPastas');
+    if (d) docs   = JSON.parse(d);
+    if (p) pastas = JSON.parse(p);
+    docIdCounter   = parseInt(localStorage.getItem('rpgDocIdCounter')   || '1');
+    pastaIdCounter = parseInt(localStorage.getItem('rpgPastaIdCounter') || '6');
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════
+function renderSidebar() {
+  const list = document.getElementById('folders-list');
+  // Remove pastas dinâmicas (mantém "Todos")
+  list.querySelectorAll('[data-folder]:not([data-folder="all"])').forEach(el => el.remove());
+
+  pastas.forEach(p => {
+    const count = docs.filter(d => d.pasta === p.id).length;
+    const item = document.createElement('div');
+    item.className = 'folder-item' + (pastaAtiva === p.id ? ' active' : '');
+    item.dataset.folder = p.id;
+    item.onclick = () => selecionarPasta(p.id, item);
+    item.innerHTML = `
+      <span class="folder-icon">${p.icone}</span>
+      <span style="color:${pastaAtiva===p.id ? p.cor : ''}">${p.nome}</span>
+      <button class="folder-edit-btn" onclick="event.stopPropagation();editarPasta('${p.id}')" title="Editar">✕</button>
+      <span class="folder-count">${count}</span>
+    `;
+    list.appendChild(item);
+  });
+
+  // Atualiza count "Todos"
+  document.getElementById('count-all').textContent = docs.length;
+
+  // Tags cloud
+  renderTagsCloud();
+}
+
+function renderTagsCloud() {
+  const allTags = new Set();
+  docs.forEach(d => (d.tags || []).forEach(t => allTags.add(t)));
+  const cloud = document.getElementById('tags-cloud');
+  cloud.innerHTML = '';
+  allTags.forEach(tag => {
+    const chip = document.createElement('div');
+    chip.className = 'tag-chip' + (tagAtiva === tag ? ' active' : '');
+    chip.textContent = tag;
+    chip.onclick = () => { tagAtiva = tagAtiva === tag ? null : tag; renderTagsCloud(); renderDocs(); };
+    cloud.appendChild(chip);
+  });
+}
+
+function selecionarPasta(id, el) {
+  pastaAtiva = id;
+  tagAtiva = null;
+  document.querySelectorAll('.folder-item').forEach(f => f.classList.remove('active'));
+  el.classList.add('active');
+  const p = pastas.find(p => p.id === id);
+  document.getElementById('breadcrumb').innerHTML =
+    id === 'all' ? 'TODOS OS DOCUMENTOS' : `<span>${p?.icone || ''} ${p?.nome || id}</span>`;
+  renderTagsCloud();
+  renderDocs();
+}
+
+// ═══════════════════════════════════════════════
+// RENDER DOCS
+// ═══════════════════════════════════════════════
+function docsFiltrados() {
+  const q = document.getElementById('search-box').value.toLowerCase().trim();
+  return docs.filter(d => {
+    if (pastaAtiva !== 'all' && d.pasta !== pastaAtiva) return false;
+    if (tagAtiva && !(d.tags || []).includes(tagAtiva)) return false;
+    if (q && !d.nome.toLowerCase().includes(q) &&
+        !(d.tags||[]).some(t => t.toLowerCase().includes(q)) &&
+        !(d.conteudo||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function renderDocs() {
+  const grid = document.getElementById('docs-grid');
+  const empty = document.getElementById('empty-state');
+  const lista = docsFiltrados();
+
+  grid.className = viewMode === 'list' ? 'list-view' : '';
+  grid.innerHTML = '';
+
+  if (lista.length === 0) { empty.style.display = 'flex'; return; }
+  empty.style.display = 'none';
+
+  lista.forEach(d => {
+    const card = criarCardEl(d);
+    grid.appendChild(card);
+  });
+}
+
+function criarCardEl(d) {
+  const card = document.createElement('div');
+  card.className = 'doc-card' + (viewMode === 'list' ? ' list-view' : '');
+  card.onclick = () => abrirViewer(d.id);
+
+  const { icon, typeLabel, color } = tipoInfo(d);
+
+  if (viewMode === 'list') {
+    // thumb pequeno
+    const thumbSm = document.createElement('div');
+    thumbSm.className = 'doc-thumb-sm';
+    if (d.tipo === 'image' && d.conteudo) {
+      thumbSm.innerHTML = `<img src="${d.conteudo}" alt="">`;
+    } else {
+      thumbSm.innerHTML = `<span class="${color}">${icon}</span>`;
+    }
+
+    const info = document.createElement('div');
+    info.className = 'doc-info list';
+    info.innerHTML = `
+      <div class="doc-name">${d.nome}</div>
+      <div class="doc-meta">${tipoLabel(d)} · ${formatDate(d.dataCriacao)} ${(d.tags||[]).map(t=>`<span class="doc-tag">${t}</span>`).join('')}</div>
+    `;
+
+    const actions = document.createElement('div');
+    actions.className = 'doc-actions';
+    actions.innerHTML = `
+      <button class="doc-action-btn" onclick="event.stopPropagation();abrirViewer('${d.id}')" title="Abrir">👁</button>
+      <button class="doc-action-btn danger" onclick="event.stopPropagation();removerDoc('${d.id}')" title="Remover">🗑</button>
+    `;
+
+    card.appendChild(thumbSm);
+    card.appendChild(info);
+    card.appendChild(actions);
+  } else {
+    // grid card
+    const thumb = document.createElement('div');
+    thumb.className = 'doc-thumb';
+    if (d.tipo === 'image' && d.conteudo) {
+      thumb.innerHTML = `<img src="${d.conteudo}" alt=""><span class="doc-type-badge">IMG</span>`;
+    } else if (d.tipo === 'pdf') {
+      thumb.innerHTML = `<span class="${color}" style="font-size:36px">📄</span><span class="doc-type-badge">PDF</span>`;
+    } else {
+      thumb.innerHTML = `<span class="${color}" style="font-size:36px">${icon}</span><span class="doc-type-badge">${typeLabel}</span>`;
+    }
+
+    const info = document.createElement('div');
+    info.className = 'doc-info';
+    info.innerHTML = `
+      <div class="doc-name">${d.nome}</div>
+      <div class="doc-meta">${formatDate(d.dataCriacao)}</div>
+      <div class="doc-tags">${(d.tags||[]).map(t=>`<span class="doc-tag">${t}</span>`).join('')}</div>
+    `;
+
+    const actions = document.createElement('div');
+    actions.className = 'doc-actions';
+    actions.style.cssText = 'position:absolute;top:6px;left:6px';
+    actions.innerHTML = `
+      <button class="doc-action-btn danger" onclick="event.stopPropagation();removerDoc('${d.id}')" title="Remover">🗑</button>
+    `;
+
+    card.appendChild(thumb);
+    card.appendChild(info);
+    card.appendChild(actions);
+  }
+
+  return card;
+}
+
+function tipoInfo(d) {
+  const map = {
+    note:  { icon:'📝', typeLabel:'NOTA',  color:'type-note'  },
+    image: { icon:'🖼️', typeLabel:'IMG',   color:'type-image' },
+    pdf:   { icon:'📄', typeLabel:'PDF',   color:'type-pdf'   },
+    link:  { icon:'🔗', typeLabel:'LINK',  color:'type-link'  },
+  };
+  return map[d.tipo] || { icon:'📎', typeLabel:'ARQ', color:'type-other' };
+}
+
+function tipoLabel(d) {
+  return tipoInfo(d).typeLabel;
+}
+
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+}
+
+// ═══════════════════════════════════════════════
+// VIEW MODE
+// ═══════════════════════════════════════════════
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById('btn-grid-view').classList.toggle('active', mode === 'grid');
+  document.getElementById('btn-list-view').classList.toggle('active', mode === 'list');
+  renderDocs();
+}
+
+function filtrar() { renderDocs(); }
+
+// ═══════════════════════════════════════════════
+// VIEWER
+// ═══════════════════════════════════════════════
+function abrirViewer(id) {
+  const d = docs.find(d => d.id === id);
+  if (!d) return;
+  viewerDocId = id;
+
+  document.getElementById('viewer-title').textContent = d.nome;
+  document.getElementById('viewer-panel').classList.add('open');
+
+  // Conteúdo
+  const content = document.getElementById('viewer-content');
+  if (d.tipo === 'note') {
+    content.innerHTML = `
+      <div style="margin-bottom:10px">
+        <input type="text" id="viewer-nome-input" value="${d.nome}"
+          style="background:rgba(0,0,0,.3);border:1px solid var(--gold-bd);color:var(--gold-text);
+                 font-family:'Cinzel',serif;font-size:13px;border-radius:5px;padding:6px 10px;
+                 width:100%;outline:none;margin-bottom:8px"
+          oninput="onViewerNomeInput(this.value)">
+        <textarea class="note-editor" id="note-textarea"
+          oninput="onNoteEdit(this.value)">${d.conteudo || ''}</textarea>
+      </div>
+    `;
+  } else if (d.tipo === 'image') {
+    content.innerHTML = `<img src="${d.conteudo}" alt="${d.nome}" style="width:100%">`;
+  } else if (d.tipo === 'pdf') {
+    content.innerHTML = `<iframe src="${d.conteudo}" style="width:100%;height:480px;border:none;border-radius:6px"></iframe>`;
+  } else if (d.tipo === 'link') {
+    content.innerHTML = `
+      <input type="text" id="viewer-nome-input" value="${d.nome}"
+        style="background:rgba(0,0,0,.3);border:1px solid var(--gold-bd);color:var(--gold-text);
+               font-family:'Cinzel',serif;font-size:13px;border-radius:5px;padding:6px 10px;
+               width:100%;outline:none;margin-bottom:10px"
+        oninput="onViewerNomeInput(this.value)">
+      <a href="${d.conteudo}" target="_blank"
+         style="color:#3b82f6;font-size:13px;word-break:break-all">${d.conteudo}</a>
+    `;
+  }
+
+  // Meta: pasta
+  const fSel = document.getElementById('viewer-folder-sel');
+  fSel.innerHTML = '<option value="">— Sem pasta —</option>' +
+    pastas.map(p => `<option value="${p.id}" ${d.pasta===p.id?'selected':''}>${p.icone} ${p.nome}</option>`).join('');
+
+  // Meta: tags
+  document.getElementById('viewer-tags-input').value = (d.tags || []).join(', ');
+
+  // Meta: visibilidade
+  const visEl = document.getElementById('viewer-visibility');
+  if (visEl) visEl.value = d.visibility || 'todos';
+}
+
+function fecharViewer() {
+  document.getElementById('viewer-panel').classList.remove('open');
+  viewerDocId = null;
+}
+
+function onNoteEdit(val) {
+  const d = docs.find(d => d.id === viewerDocId);
+  if (d) { d.conteudo = val; d.dataEdit = Date.now(); }
+}
+
+function onViewerNomeInput(val) {
+  const d = docs.find(d => d.id === viewerDocId);
+  if (d) { d.nome = val; document.getElementById('viewer-title').textContent = val; }
+}
+
+function onViewerFolderChange() {
+  const d = docs.find(d => d.id === viewerDocId);
+  if (d) d.pasta = document.getElementById('viewer-folder-sel').value || null;
+}
+
+function onViewerTagsInput() {
+  const d = docs.find(d => d.id === viewerDocId);
+  if (d) {
+    d.tags = document.getElementById('viewer-tags-input').value
+      .split(',').map(t => t.trim()).filter(Boolean);
+  }
+}
+
+function onViewerVisibilityChange() {
+  const d = docs.find(d => d.id === viewerDocId);
+  if (d) d.visibility = document.getElementById('viewer-visibility').value;
+}
+
+function salvarDoc() {
+  salvarLocal();
+  renderDocs();
+  renderSidebar();
+  // feedback visual
+  const btn = document.querySelector('#viewer-header .icon-btn');
+  if (btn) { const orig = btn.textContent; btn.textContent = '✅'; setTimeout(() => btn.textContent = orig, 1200); }
+}
+
+// ═══════════════════════════════════════════════
+// REMOVER DOC
+// ═══════════════════════════════════════════════
+function removerDoc(id) {
+  if (!confirm('Remover este documento? Não pode ser desfeito.')) return;
+  docs = docs.filter(d => d.id !== id);
+  if (viewerDocId === id) fecharViewer();
+  salvarLocal();
+  renderDocs();
+  renderSidebar();
+}
+
+// ═══════════════════════════════════════════════
+// UPLOAD DE ARQUIVOS
+// ═══════════════════════════════════════════════
+function setupUpload() {
+  const input = document.getElementById('file-upload-input');
+  input.addEventListener('change', e => processarArquivos(e.target.files));
+
+  // Drag & drop global
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length) processarArquivos(e.dataTransfer.files);
+  });
+}
+
+function processarArquivos(files) {
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const tipo = file.type.startsWith('image/') ? 'image'
+                 : file.type === 'application/pdf' ? 'pdf'
+                 : 'other';
+      adicionarDoc({
+        nome: file.name.replace(/\.[^.]+$/, ''),
+        tipo,
+        conteudo: ev.target.result,
+        pasta: pastaAtiva !== 'all' ? pastaAtiva : null,
+        tags: [],
+        visibility: 'mestre', // campo para futuro controle de permissão
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function adicionarDoc(opts) {
+  const doc = {
+    id: 'doc' + (docIdCounter++),
+    nome:        opts.nome        || 'Sem título',
+    tipo:        opts.tipo        || 'note',
+    pasta:       opts.pasta       || null,
+    tags:        opts.tags        || [],
+    conteudo:    opts.conteudo    || '',
+    dataCriacao: opts.dataCriacao || Date.now(),
+    dataEdit:    opts.dataEdit    || Date.now(),
+    visibility:  opts.visibility  || 'mestre',
+  };
+  docs.push(doc);
+  salvarLocal();
+  renderDocs();
+  renderSidebar();
+  return doc;
+}
+
+// ═══════════════════════════════════════════════
+// MODAIS
+// ═══════════════════════════════════════════════
+function abrirModalPasta(id) {
+  editPastaId = id || null;
+  modalMode = 'pasta';
+  const p = id ? pastas.find(p => p.id === id) : null;
+  document.getElementById('modal-title').textContent = p ? 'EDITAR PASTA' : 'NOVA PASTA';
+  document.getElementById('modal-confirm').textContent = p ? 'Salvar' : 'Criar';
+
+  const iconOptions = PASTA_ICONS.map((ic,i) =>
+    `<option value="${ic}" ${p?.icone===ic||(!p&&i===0)?'selected':''}>${ic}</option>`).join('');
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-field">
+      <label>Nome da pasta</label>
+      <input type="text" id="pasta-nome" value="${p?.nome||''}" placeholder="Ex: NPCs, Mapas, Lore...">
+    </div>
+    <div class="modal-field">
+      <label>Ícone</label>
+      <select id="pasta-icone">${iconOptions}</select>
+    </div>
+    <div class="modal-field">
+      <label>Cor</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${PASTA_CORES.map(c => `
+          <div onclick="selecionarCorPasta('${c}')"
+               style="width:22px;height:22px;background:${c};border-radius:50%;cursor:pointer;
+                      border:2px solid ${p?.cor===c ? 'white':'transparent'};
+                      transition:transform .15s" id="corPasta-${c.replace('#','')}"></div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  if (!p) selecionarCorPasta(PASTA_CORES[0]);
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('pasta-nome').focus(), 100);
+}
+
+function selecionarCorPasta(cor) {
+  document.querySelectorAll('[id^="corPasta-"]').forEach(el => el.style.border = '2px solid transparent');
+  const el = document.getElementById('corPasta-' + cor.replace('#',''));
+  if (el) el.style.border = '2px solid white';
+  document.getElementById('modal-body').dataset.cor = cor;
+}
+
+function abrirModalNota() {
+  modalMode = 'nota';
+  document.getElementById('modal-title').textContent = 'NOVA NOTA';
+  document.getElementById('modal-confirm').textContent = 'Criar';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-field">
+      <label>Título</label>
+      <input type="text" id="nota-nome" placeholder="Título da nota...">
+    </div>
+    <div class="modal-field">
+      <label>Pasta</label>
+      <select id="nota-pasta">
+        <option value="">— Sem pasta —</option>
+        ${pastas.map(p => `<option value="${p.id}" ${pastaAtiva===p.id?'selected':''}>${p.icone} ${p.nome}</option>`).join('')}
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Tags (separadas por vírgula)</label>
+      <input type="text" id="nota-tags" placeholder="npc, importante, missão...">
+    </div>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('nota-nome').focus(), 100);
+}
+
+function fecharModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  modalMode = null; editPastaId = null;
+}
+
+function confirmarModal() {
+  if (modalMode === 'pasta') {
+    const nome  = document.getElementById('pasta-nome').value.trim();
+    if (!nome) return;
+    const icone = document.getElementById('pasta-icone').value;
+    const cor   = document.getElementById('modal-body').dataset.cor || PASTA_CORES[0];
+    if (editPastaId) {
+      const p = pastas.find(p => p.id === editPastaId);
+      if (p) { p.nome = nome; p.icone = icone; p.cor = cor; }
+    } else {
+      pastas.push({ id: 'pasta' + (pastaIdCounter++), nome, icone, cor });
+    }
+    salvarLocal();
+    renderSidebar();
+  } else if (modalMode === 'nota') {
+    const nome  = document.getElementById('nota-nome').value.trim() || 'Nova nota';
+    const pasta = document.getElementById('nota-pasta').value || null;
+    const tags  = document.getElementById('nota-tags').value
+      .split(',').map(t => t.trim()).filter(Boolean);
+    const doc = adicionarDoc({ nome, tipo:'note', pasta, tags, conteudo:'' });
+    abrirViewer(doc.id);
+  }
+  fecharModal();
+}
+
+function editarPasta(id) {
+  abrirModalPasta(id);
+}
+
+// Enter nos modais
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') fecharModal();
+  if (e.key === 'Enter' && document.getElementById('modal-overlay').classList.contains('open')) {
+    const focused = document.activeElement?.tagName;
+    if (focused !== 'TEXTAREA') confirmarModal();
+  }
+});
+
+// Click fora fecha modal
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) fecharModal();
+});
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
