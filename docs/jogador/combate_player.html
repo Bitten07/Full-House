@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combate — Jogador</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold:      #d4af37;
+  --gold-dim:  rgba(212,175,55,.15);
+  --gold-bd:   rgba(212,175,55,.25);
+  --gold-text: #e8d5a3;
+  --ink:       #0a0806;
+  --ink2:      #111008;
+  --ink3:      #1a1710;
+  --text:      #cfc3a4;
+  --text-dim:  #5a5040;
+  --red:       #c0392b;
+  --red-dim:   rgba(192,57,43,.18);
+  --green:     #16a34a;
+  --green-dim: rgba(22,163,74,.15);
+}
+html, body {
+  width: 100%; height: 100%;
+  background: transparent;
+  font-family: 'Crimson Pro', serif;
+  color: var(--text);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* PAINEL */
+#panel {
+  position: fixed;
+  top: 70px; left: 14px;
+  width: 230px;
+  background: rgba(10,8,6,.94);
+  border: 1px solid var(--gold-bd);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 4px 4px 24px rgba(0,0,0,.7);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 90px);
+  overflow: hidden;
+  z-index: 90;
+}
+
+#panel-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 10px 8px;
+  border-bottom: 1px solid var(--gold-bd);
+  background: rgba(212,175,55,.05);
+  cursor: grab; flex-shrink: 0;
+}
+#panel-header:active { cursor: grabbing; }
+#panel-title {
+  font-family: 'Cinzel', serif; font-size: 9px;
+  letter-spacing: 2.5px; color: var(--gold); flex: 1;
+}
+.round-badge {
+  font-family: 'Cinzel', serif; font-size: 9px;
+  color: var(--text-dim);
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--gold-bd);
+  border-radius: 5px; padding: 2px 7px;
+  display: flex; align-items: center; gap: 4px;
+}
+.round-badge span { color: var(--gold); font-size: 11px; font-weight: 700; }
+.hdr-icon-btn {
+  background: none; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 13px; padding: 2px 4px;
+  border-radius: 4px; transition: all .15s; line-height: 1;
+}
+.hdr-icon-btn:hover { color: var(--gold); background: var(--gold-dim); }
+
+/* LISTA */
+#lista {
+  overflow-y: auto; overflow-x: hidden; flex: 1; padding: 5px;
+  scrollbar-width: thin; scrollbar-color: var(--gold-bd) transparent;
+}
+.empty-msg {
+  text-align: center; padding: 16px 8px;
+  font-family: 'Cinzel', serif; font-size: 8px;
+  letter-spacing: 2px; color: var(--text-dim); line-height: 1.8;
+}
+.comb-row {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 7px; border-radius: 7px;
+  border: 1px solid transparent; cursor: pointer;
+  transition: all .15s; margin-bottom: 2px;
+}
+.comb-row:hover { background: var(--gold-dim); border-color: var(--gold-bd); }
+.comb-row.ativo {
+  background: rgba(212,175,55,.1);
+  border-color: rgba(212,175,55,.4);
+  box-shadow: inset 3px 0 0 var(--gold);
+  animation: turnPulse 2s ease-in-out infinite;
+}
+.comb-row.morto { opacity: .4; }
+.comb-row.morto .comb-nome { text-decoration: line-through; }
+.comb-pos {
+  font-family: 'Cinzel', serif; font-size: 9px;
+  color: var(--text-dim); min-width: 12px; text-align: center; flex-shrink: 0;
+}
+.comb-row.ativo .comb-pos { color: var(--gold); font-weight: 700; }
+.comb-dot {
+  width: 24px; height: 24px; border-radius: 50%; border: 2px solid;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0;
+}
+.comb-info { flex: 1; min-width: 0; }
+.comb-nome {
+  font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: .8px;
+  color: var(--gold-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.comb-row.ativo .comb-nome { color: var(--gold); }
+.comb-hp-row { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.comb-hp-txt { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+.comb-hp-bar { flex: 1; height: 3px; background: rgba(255,255,255,.07); border-radius: 2px; overflow: hidden; }
+.comb-hp-fill { height: 100%; border-radius: 2px; transition: width .3s, background .3s; }
+.comb-conds-mini { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 3px; }
+.cond-dot { width: 7px; height: 7px; border-radius: 50%; border: 1px solid; flex-shrink: 0; }
+
+/* FOOTER */
+#panel-footer {
+  border-top: 1px solid var(--gold-bd); padding: 7px;
+  display: flex; gap: 5px; flex-shrink: 0;
+}
+.btn-next {
+  flex: 1; background: var(--gold-dim); border: 1px solid var(--gold);
+  color: var(--gold); font-family: 'Cinzel', serif; font-size: 8px;
+  letter-spacing: 1.5px; padding: 6px 4px; border-radius: 6px;
+  cursor: pointer; transition: all .15s;
+}
+.btn-next:hover { background: rgba(212,175,55,.25); }
+.btn-add-small {
+  background: rgba(255,255,255,.04); border: 1px dashed var(--gold-bd);
+  color: var(--text-dim); border-radius: 6px; width: 30px;
+  cursor: pointer; font-size: 14px; transition: all .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-add-small:hover { color: var(--gold); border-color: var(--gold); background: var(--gold-dim); }
+
+/* POPUP */
+#popup {
+  position: fixed; width: 260px;
+  background: rgba(10,8,6,.98);
+  border: 1px solid var(--gold-bd);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.8);
+  z-index: 200; display: none; flex-direction: column;
+  overflow: hidden; animation: popIn .15s ease;
+}
+#popup.open { display: flex; }
+@keyframes popIn {
+  from { opacity:0; transform:scale(.95) translateY(-4px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+#popup-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px 8px; border-bottom: 1px solid var(--gold-bd);
+  background: rgba(212,175,55,.05);
+}
+#popup-nome-input {
+  flex: 1; background: none; border: none; color: var(--gold);
+  font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px;
+  outline: none; min-width: 0;
+}
+.popup-close {
+  background: none; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 16px; line-height: 1; transition: color .15s;
+}
+.popup-close:hover { color: var(--red); }
+#popup-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.hp-control {
+  background: rgba(0,0,0,.3); border: 1px solid var(--gold-bd);
+  border-radius: 7px; padding: 8px 10px;
+}
+.hp-ctrl-label {
+  font-family: 'Cinzel', serif; font-size: 8px;
+  letter-spacing: 1.5px; color: var(--text-dim); margin-bottom: 6px;
+}
+.hp-ctrl-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.hp-num-input {
+  background: rgba(0,0,0,.4); border: 1px solid var(--gold-bd); color: white;
+  font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700;
+  text-align: center; border-radius: 5px; padding: 4px; width: 46px;
+  outline: none; transition: border-color .15s;
+}
+.hp-num-input:focus { border-color: var(--gold); }
+.hp-sep { color: var(--text-dim); font-size: 12px; }
+.hp-adj-btn {
+  background: none; border: 1px solid var(--gold-bd); color: var(--text-dim);
+  border-radius: 5px; padding: 3px 7px; font-size: 12px; cursor: pointer;
+  transition: all .15s; font-family: 'Crimson Pro', serif;
+}
+.hp-adj-btn.dmg:hover { color: #e07070; border-color: var(--red); background: var(--red-dim); }
+.hp-adj-btn.heal:hover { color: #5ebd8a; border-color: var(--green); background: var(--green-dim); }
+.popup-hp-bar { height: 5px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.popup-hp-fill { height: 100%; border-radius: 3px; transition: width .3s, background .3s; }
+.mini-row { display: flex; align-items: center; gap: 6px; }
+.mini-label {
+  font-family: 'Cinzel', serif; font-size: 8px;
+  letter-spacing: 1.5px; color: var(--text-dim); min-width: 48px;
+}
+.mini-input {
+  background: rgba(0,0,0,.35); border: 1px solid var(--gold-bd); color: var(--text);
+  font-family: 'Crimson Pro', serif; font-size: 13px; border-radius: 4px;
+  padding: 3px 7px; outline: none; width: 58px; transition: border-color .15s; text-align: center;
+}
+.mini-input:focus { border-color: var(--gold); }
+.mini-select {
+  background: rgba(0,0,0,.35); border: 1px solid var(--gold-bd); color: var(--text);
+  font-family: 'Crimson Pro', serif; font-size: 12px;
+  border-radius: 4px; padding: 3px 6px; outline: none; cursor: pointer; flex: 1;
+}
+.mini-select option { background: #0a0806; }
+.conds-section {
+  background: rgba(0,0,0,.25); border: 1px solid var(--gold-bd);
+  border-radius: 7px; padding: 7px 9px;
+}
+.conds-title {
+  font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 1.5px;
+  color: var(--text-dim); margin-bottom: 6px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.conds-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.cond-chip-active {
+  font-size: 9px; font-family: 'Cinzel', serif;
+  padding: 2px 7px; border-radius: 8px; border: 1px solid; cursor: pointer; transition: all .15s;
+}
+.cond-chip-active:hover { opacity: .6; }
+.btn-cond-add {
+  background: none; border: 1px dashed var(--gold-bd); color: var(--text-dim);
+  border-radius: 5px; font-size: 10px; padding: 1px 7px; cursor: pointer; transition: all .15s;
+}
+.btn-cond-add:hover { color: var(--gold); border-color: var(--gold); }
+#popup-footer { display: flex; gap: 5px; padding: 8px 10px; border-top: 1px solid var(--gold-bd); }
+.popup-btn {
+  background: none; border: 1px solid var(--gold-bd); color: var(--text-dim);
+  border-radius: 5px; padding: 5px 9px; font-family: 'Cinzel', serif;
+  font-size: 8px; letter-spacing: 1px; cursor: pointer; transition: all .15s;
+}
+.popup-btn:hover { color: var(--gold); border-color: var(--gold); background: var(--gold-dim); }
+.popup-btn.danger:hover { color: #e07070; border-color: var(--red); background: var(--red-dim); }
+.popup-btn.save { flex: 1; border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+.popup-btn.save:hover { background: rgba(212,175,55,.25); }
+
+/* OVERLAY CONDIÇÕES */
+#cond-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.65);
+  z-index: 300; display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(2px);
+}
+#cond-overlay.open { display: flex; }
+.cond-box {
+  background: var(--ink2); border: 1px solid var(--gold-bd); border-radius: 10px;
+  width: 360px; max-height: 75vh; overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 16px 48px rgba(0,0,0,.9); animation: popIn .2s ease;
+}
+.cond-box-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 14px; border-bottom: 1px solid var(--gold-bd);
+  background: rgba(212,175,55,.04); flex-shrink: 0;
+}
+.cond-box-hdr span { font-family:'Cinzel',serif; font-size:9px; letter-spacing:2.5px; color:var(--gold); }
+.cond-box-body { padding: 12px; overflow-y: auto; flex: 1; }
+.cond-sec-title {
+  font-family:'Cinzel',serif; font-size:8px; letter-spacing:2px;
+  color:var(--text-dim); margin: 8px 0 5px;
+}
+.cond-sec-title:first-child { margin-top: 0; }
+.cond-grid { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+.cond-toggle {
+  font-size:9px; font-family:'Cinzel',serif; padding:3px 9px;
+  border-radius:8px; border:1px solid; cursor:pointer; transition:all .15s; letter-spacing:.5px;
+}
+.cond-toggle.on { filter: brightness(1.2); box-shadow: 0 0 6px currentColor; }
+.custom-cond-row {
+  display:flex; gap:5px; align-items:center;
+  margin-top:8px; padding-top:8px; border-top:1px solid var(--gold-bd);
+}
+.custom-input {
+  flex:1; background:rgba(0,0,0,.35); border:1px solid var(--gold-bd);
+  color:var(--text); font-family:'Crimson Pro',serif; font-size:13px;
+  border-radius:4px; padding:4px 8px; outline:none;
+}
+.custom-input:focus { border-color: var(--gold); }
+.custom-color { width:26px; height:26px; border-radius:50%; cursor:pointer; border:2px solid transparent; flex-shrink:0; }
+.btn-custom-add {
+  background:var(--gold-dim); border:1px solid var(--gold); color:var(--gold);
+  border-radius:5px; padding:4px 9px; font-family:'Cinzel',serif;
+  font-size:9px; cursor:pointer; transition:all .15s;
+}
+.btn-custom-add:hover { background: rgba(212,175,55,.25); }
+.cond-box-footer {
+  display:flex; gap:7px; justify-content:flex-end;
+  padding:9px 13px; border-top:1px solid var(--gold-bd); flex-shrink:0;
+}
+.btn-c { background:none; border:1px solid rgba(212,175,55,.2); color:var(--text-dim); font-family:'Cinzel',serif; font-size:8px; letter-spacing:1.5px; padding:6px 12px; border-radius:5px; cursor:pointer; transition:all .15s; }
+.btn-c:hover { border-color:var(--gold-bd); color:var(--text); }
+.btn-ok { background:var(--gold-dim); border:1px solid var(--gold); color:var(--gold); font-family:'Cinzel',serif; font-size:8px; letter-spacing:1.5px; padding:6px 12px; border-radius:5px; cursor:pointer; transition:all .15s; }
+.btn-ok:hover { background:rgba(212,175,55,.25); }
+
+/* OVERLAY ADICIONAR */
+#add-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.65);
+  z-index:300; display:none; align-items:center; justify-content:center;
+  backdrop-filter:blur(2px);
+}
+#add-overlay.open { display:flex; }
+.add-box {
+  background:var(--ink2); border:1px solid var(--gold-bd); border-radius:10px;
+  width:300px; overflow:hidden; box-shadow:0 16px 48px rgba(0,0,0,.9); animation:popIn .2s ease;
+}
+.add-box-hdr {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:11px 14px; border-bottom:1px solid var(--gold-bd); background:rgba(212,175,55,.04);
+}
+.add-box-hdr span { font-family:'Cinzel',serif; font-size:9px; letter-spacing:2.5px; color:var(--gold); }
+.add-box-body { padding:14px; display:flex; flex-direction:column; gap:9px; }
+.add-field { display:flex; flex-direction:column; gap:3px; }
+.add-label { font-family:'Cinzel',serif; font-size:8px; letter-spacing:1.5px; color:var(--text-dim); }
+.add-input {
+  background:rgba(0,0,0,.4); border:1px solid rgba(212,175,55,.2); color:var(--text);
+  font-family:'Crimson Pro',serif; font-size:13px; border-radius:5px;
+  padding:5px 9px; outline:none; transition:border-color .15s; width:100%;
+}
+.add-input:focus { border-color:var(--gold); }
+.add-input-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.add-box-footer { display:flex; gap:7px; justify-content:flex-end; padding:9px 13px; border-top:1px solid var(--gold-bd); }
+
+/* ANIMAÇÕES */
+@keyframes turnPulse {
+  0%,100%{ box-shadow: inset 3px 0 0 var(--gold), 0 0 8px rgba(212,175,55,.08); }
+  50%    { box-shadow: inset 3px 0 0 var(--gold), 0 0 18px rgba(212,175,55,.3); }
+}
+@keyframes dmgFlash  { 0%{background:rgba(192,57,43,.35)} 100%{background:transparent} }
+@keyframes healFlash { 0%{background:rgba(22,163,74,.28)}  100%{background:transparent} }
+.comb-row.dmg-flash  { animation: dmgFlash  .45s ease; }
+.comb-row.heal-flash { animation: healFlash .45s ease; }
+</style>
+</head>
+<body>
+
+<div id="panel">
+  <div id="panel-header">
+    <span id="panel-title">⚔️ COMBATE</span>
+    <div class="round-badge">R <span id="round-num">1</span></div>
+    <button class="hdr-icon-btn" onclick="rolarTodas()" title="Rolar iniciativas">🎲</button>
+    <button class="hdr-icon-btn" onclick="resetar()" title="Resetar">↺</button>
+  </div>
+  <div id="lista"></div>
+  <div id="panel-footer">
+    <button class="btn-next" onclick="proximoTurno()">▶ PRÓXIMO TURNO</button>
+    <button class="btn-add-small" onclick="abrirAdd()" title="Adicionar">＋</button>
+  </div>
+</div>
+
+<div id="popup" style="display:none!important">
+  <div id="popup-header">
+    <input id="popup-nome-input" type="text" maxlength="28" oninput="popupNomeChange(this.value)">
+    <button class="popup-close" onclick="fecharPopup()">×</button>
+  </div>
+  <div id="popup-body">
+    <div class="hp-control">
+      <div class="hp-ctrl-label">PONTOS DE VIDA</div>
+      <div class="hp-ctrl-row">
+        <button class="hp-adj-btn dmg" onclick="ajustarHP(-1)">-1</button>
+        <button class="hp-adj-btn dmg" onclick="pedirDano()">Dano</button>
+        <input class="hp-num-input" id="pop-hp-cur" type="number" oninput="hpCurInput(this.value)">
+        <span class="hp-sep">/</span>
+        <input class="hp-num-input" id="pop-hp-max" type="number" oninput="hpMaxInput(this.value)">
+        <button class="hp-adj-btn heal" onclick="pedirCura()">Cura</button>
+        <button class="hp-adj-btn heal" onclick="restaurarHP()">↺</button>
+      </div>
+      <div class="popup-hp-bar"><div class="popup-hp-fill" id="pop-hp-bar"></div></div>
+    </div>
+    <div class="mini-row">
+      <span class="mini-label">INICIATIVA</span>
+      <input class="mini-input" id="pop-ini" type="number" oninput="iniInput(this.value)">
+      <select class="mini-select" id="pop-tipo" onchange="tipoChange(this.value)">
+        <option value="pc">👤 PC</option>
+        <option value="npc">🟡 NPC</option>
+        <option value="enemy">💀 Inimigo</option>
+      </select>
+    </div>
+    <div class="conds-section">
+      <div class="conds-title">
+        CONDIÇÕES
+        <button class="btn-cond-add" onclick="abrirCondOverlay()">＋</button>
+      </div>
+      <div class="conds-chips" id="pop-conds"></div>
+    </div>
+  </div>
+  <div id="popup-footer">
+    <button class="popup-btn danger" onclick="removerAtivo()">🗑 Remover</button>
+    <button class="popup-btn save"   onclick="salvarPopup()">💾 Salvar</button>
+  </div>
+</div>
+
+<div id="cond-overlay">
+  <div class="cond-box">
+    <div class="cond-box-hdr">
+      <span>CONDIÇÕES</span>
+      <button class="popup-close" onclick="fecharCondOverlay()">×</button>
+    </div>
+    <div class="cond-box-body" id="cond-box-body"></div>
+    <div class="cond-box-footer">
+      <button class="btn-c" onclick="fecharCondOverlay()">Cancelar</button>
+      <button class="btn-ok" onclick="confirmarConds()">Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<div id="add-overlay" style="display:none!important">
+  <div class="add-box">
+    <div class="add-box-hdr">
+      <span>NOVO COMBATENTE</span>
+      <button class="popup-close" onclick="fecharAdd()">×</button>
+    </div>
+    <div class="add-box-body">
+      <div class="add-field"><span class="add-label">NOME</span><input class="add-input" id="add-nome" placeholder="Ex: Goblin, Theron..."></div>
+      <div class="add-input-row">
+        <div class="add-field"><span class="add-label">INICIATIVA</span><input class="add-input" id="add-ini" type="number" placeholder="0"></div>
+        <div class="add-field"><span class="add-label">HP MÁX</span><input class="add-input" id="add-hp" type="number" placeholder="10"></div>
+      </div>
+      <div class="add-field">
+        <span class="add-label">TIPO</span>
+        <select class="add-input" id="add-tipo">
+          <option value="pc">👤 PC</option>
+          <option value="npc">🟡 NPC</option>
+          <option value="enemy" selected>💀 Inimigo</option>
+        </select>
+      </div>
+    </div>
+    <div class="add-box-footer">
+      <button class="btn-c" onclick="fecharAdd()">Cancelar</button>
+      <button class="btn-ok" onclick="confirmarAdd()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CONDS_T20 = [
+  {id:'abalado',nome:'Abalado',cor:'#ca8a04'},{id:'agarrado',nome:'Agarrado',cor:'#9333ea'},
+  {id:'apavorado',nome:'Apavorado',cor:'#c0392b'},{id:'atordoado',nome:'Atordoado',cor:'#7c3aed'},
+  {id:'caido',nome:'Caído',cor:'#6b7280'},{id:'cego',nome:'Cego',cor:'#374151'},
+  {id:'confuso',nome:'Confuso',cor:'#ec4899'},{id:'desprev',nome:'Desprep.',cor:'#f97316'},
+  {id:'ensurd',nome:'Ensurdecido',cor:'#78716c'},{id:'entoxi',nome:'Entoxi.',cor:'#4ade80'},
+  {id:'exausto',nome:'Exausto',cor:'#a16207'},{id:'fatigado',nome:'Fatigado',cor:'#b45309'},
+  {id:'fascin',nome:'Fascinado',cor:'#06b6d4'},{id:'imob',nome:'Imobilizado',cor:'#64748b'},
+  {id:'incap',nome:'Incapaz',cor:'#e11d48'},{id:'indefeso',nome:'Indefeso',cor:'#dc2626'},
+  {id:'invisivel',nome:'Invisível',cor:'#a8a29e'},{id:'lento',nome:'Lento',cor:'#0ea5e9'},
+  {id:'paralisado',nome:'Paralisado',cor:'#6366f1'},{id:'sangrando',nome:'Sangrando',cor:'#dc2626'},
+  {id:'surpreso',nome:'Surpreso',cor:'#f59e0b'},{id:'petrif',nome:'Petrificado',cor:'#9ca3af'},
+];
+
+const TIPO_STYLE = {
+  pc:    {cor:'#d4af37',bg:'rgba(212,175,55,.12)',emoji:'👤'},
+  npc:   {cor:'#ca8a04',bg:'rgba(202,138,4,.12)', emoji:'🟡'},
+  enemy: {cor:'#dc2626',bg:'rgba(220,38,38,.15)', emoji:'💀'},
+};
+
+let combatentes=[], rodada=1, turno=-1, idCtr=1, customConds=[];
+let popupId=null, condTargetId=null, condSet=new Set();
+
+function init() { carregar(); render(); setupDrag(); setupKeys(); }
+
+function ordenados() {
+  return [...combatentes].sort((a,b)=>b.iniciativa-a.iniciativa||b.des-a.des);
+}
+
+function render() {
+  document.getElementById('round-num').textContent = rodada;
+  const lista = document.getElementById('lista');
+  const ord = ordenados();
+  if (!ord.length) { lista.innerHTML='<div class="empty-msg">SEM COMBATENTES<br>CLIQUE EM ＋ PARA ADICIONAR</div>'; return; }
+  lista.innerHTML='';
+  ord.forEach((c,idx)=>{
+    const isAtivo = turno>=0 && idx===turno%ord.length;
+    const pct = Math.max(0,Math.min(100,c.hpAtual/c.hpMax*100));
+    const hpColor = pct>60?'#16a34a':pct>25?'#ca8a04':'#dc2626';
+    const ts = TIPO_STYLE[c.tipo]||TIPO_STYLE.enemy;
+    const allC = [...CONDS_T20,...customConds];
+    const condDots = (c.conds||[]).map(cid=>{
+      const cd=allC.find(x=>x.id===cid);
+      return cd?`<div class="cond-dot" style="background:${cd.cor};border-color:${cd.cor}" title="${cd.nome}"></div>`:'';
+    }).join('');
+    const row=document.createElement('div');
+    row.className='comb-row'+(isAtivo?' ativo':'')+(c.hpAtual<=0?' morto':'');
+    row.id='row-'+c.id; row.dataset.id=c.id;
+    row.innerHTML=`
+      <span class="comb-pos">${idx+1}</span>
+      <div class="comb-dot" style="border-color:${ts.cor};background:${ts.bg}">${ts.emoji}</div>
+      <div class="comb-info">
+        <div class="comb-nome">${c.nome}</div>
+        <div class="comb-hp-row">
+          <span class="comb-hp-txt">${c.hpAtual}/${c.hpMax}</span>
+          <div class="comb-hp-bar"><div class="comb-hp-fill" style="width:${pct}%;background:${hpColor}"></div></div>
+        </div>
+        ${condDots?`<div class="comb-conds-mini">${condDots}</div>`:''}
+      </div>`;
+    row.addEventListener('click',e=>{e.stopPropagation();/* jogador só visualiza */});
+    lista.appendChild(row);
+  });
+  if(popupId){const r=document.getElementById('row-'+popupId);if(r)posicionarPopup(r);}
+}
+
+function proximoTurno() {
+  if(!combatentes.length)return;
+  const tot=ordenados().length;
+  if(turno<0){turno=0;}else{turno++;if(turno>=tot){turno=0;rodada++;}}
+  salvar();render();
+  const ativo=ordenados()[turno];
+  if(ativo)document.getElementById('row-'+ativo.id)?.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function rolarTodas(){combatentes.forEach(c=>{c.iniciativa=Math.floor(Math.random()*20)+1;});turno=-1;rodada=1;salvar();render();}
+function resetar(){if(!confirm('Resetar combate?'))return;combatentes=[];turno=-1;rodada=1;fecharPopup();salvar();render();}
+
+function abrirPopup(id,rowEl){
+  popupId=id;
+  const c=combatentes.find(c=>c.id===id);if(!c)return;
+  document.getElementById('popup-nome-input').value=c.nome;
+  document.getElementById('pop-hp-cur').value=c.hpAtual;
+  document.getElementById('pop-hp-max').value=c.hpMax;
+  document.getElementById('pop-ini').value=c.iniciativa;
+  document.getElementById('pop-tipo').value=c.tipo;
+  atualizarPopupHP(c);renderPopupConds(c);
+  document.getElementById('popup').classList.add('open');
+  posicionarPopup(rowEl);
+}
+function posicionarPopup(rowEl){
+  const popup=document.getElementById('popup');
+  const panel=document.getElementById('panel');
+  const pr=panel.getBoundingClientRect();
+  const rr=rowEl.getBoundingClientRect();
+  const ph=popup.offsetHeight||320;
+  let top=rr.top;
+  if(top+ph>window.innerHeight-10)top=window.innerHeight-ph-10;
+  if(top<10)top=10;
+  popup.style.left=(pr.right+8)+'px';
+  popup.style.top=top+'px';
+}
+function fecharPopup(){document.getElementById('popup').classList.remove('open');popupId=null;}
+function popupNomeChange(v){const c=combatentes.find(c=>c.id===popupId);if(c)c.nome=v;}
+function hpCurInput(v){const c=combatentes.find(c=>c.id===popupId);if(!c)return;c.hpAtual=parseInt(v)||0;atualizarPopupHP(c);}
+function hpMaxInput(v){const c=combatentes.find(c=>c.id===popupId);if(!c)return;c.hpMax=parseInt(v)||1;atualizarPopupHP(c);}
+function iniInput(v){const c=combatentes.find(c=>c.id===popupId);if(c)c.iniciativa=parseInt(v)||0;}
+function tipoChange(v){const c=combatentes.find(c=>c.id===popupId);if(c)c.tipo=v;}
+function atualizarPopupHP(c){
+  const pct=Math.max(0,Math.min(100,c.hpAtual/c.hpMax*100));
+  const col=pct>60?'#16a34a':pct>25?'#ca8a04':'#dc2626';
+  document.getElementById('pop-hp-bar').style.width=pct+'%';
+  document.getElementById('pop-hp-bar').style.background=col;
+}
+function ajustarHP(delta){
+  const c=combatentes.find(c=>c.id===popupId);if(!c)return;
+  c.hpAtual=Math.max(0,Math.min(c.hpMax,c.hpAtual+delta));
+  document.getElementById('pop-hp-cur').value=c.hpAtual;
+  atualizarPopupHP(c);flashRow(c.id,delta<0?'dmg':'heal');
+}
+function pedirDano(){const v=parseInt(prompt('Dano:'));if(v&&v>0)ajustarHP(-v);}
+function pedirCura(){const v=parseInt(prompt('Cura:'));if(v&&v>0)ajustarHP(v);}
+function restaurarHP(){
+  const c=combatentes.find(c=>c.id===popupId);if(!c)return;
+  c.hpAtual=c.hpMax;document.getElementById('pop-hp-cur').value=c.hpAtual;
+  atualizarPopupHP(c);flashRow(c.id,'heal');
+}
+function flashRow(id,tipo){
+  const row=document.getElementById('row-'+id);if(!row)return;
+  row.classList.add(tipo+'-flash');setTimeout(()=>row.classList.remove(tipo+'-flash'),450);
+}
+function renderPopupConds(c){
+  const cont=document.getElementById('pop-conds');
+  const allC=[...CONDS_T20,...customConds];
+  if(!c.conds?.length){cont.innerHTML='<span style="font-size:10px;color:var(--text-dim)">Nenhuma</span>';return;}
+  cont.innerHTML=c.conds.map(cid=>{
+    const cd=allC.find(x=>x.id===cid);
+    return cd?`<span class="cond-chip-active" style="color:${cd.cor};border-color:${cd.cor};background:${cd.cor}22" onclick="removerCondDireta('${cid}')" title="Clique para remover">${cd.nome}</span>`:'';
+  }).join('');
+}
+function removerCondDireta(cid){
+  const c=combatentes.find(c=>c.id===popupId);if(!c)return;
+  c.conds=(c.conds||[]).filter(x=>x!==cid);renderPopupConds(c);
+}
+function salvarPopup(){salvar();render();fecharPopup();}
+function removerAtivo(){if(!popupId)return;combatentes=combatentes.filter(c=>c.id!==popupId);fecharPopup();salvar();render();}
+
+function abrirCondOverlay(){
+  condTargetId=popupId;
+  const c=combatentes.find(c=>c.id===condTargetId);
+  condSet=new Set(c?.conds||[]);
+  renderCondBox();document.getElementById('cond-overlay').classList.add('open');
+}
+function fecharCondOverlay(){document.getElementById('cond-overlay').classList.remove('open');}
+function renderCondBox(){
+  const body=document.getElementById('cond-box-body');
+  let html=`<div class="cond-sec-title">CONDIÇÕES T20</div><div class="cond-grid">`;
+  CONDS_T20.forEach(cd=>{
+    const on=condSet.has(cd.id);
+    html+=`<span class="cond-toggle ${on?'on':''}" style="color:${cd.cor};border-color:${cd.cor};background:${cd.cor}${on?'33':'18'}" onclick="toggleCondBox('${cd.id}')">${cd.nome}</span>`;
+  });
+  html+=`</div>`;
+  if(customConds.length){
+    html+=`<div class="cond-sec-title">CUSTOMIZADAS</div><div class="cond-grid">`;
+    customConds.forEach(cd=>{
+      const on=condSet.has(cd.id);
+      html+=`<span class="cond-toggle ${on?'on':''}" style="color:${cd.cor};border-color:${cd.cor};background:${cd.cor}${on?'33':'18'}" onclick="toggleCondBox('${cd.id}')">${cd.nome}</span>`;
+    });
+    html+=`</div>`;
+  }
+  html+=`<div class="cond-sec-title">NOVA CONDIÇÃO</div>
+    <div class="custom-cond-row">
+      <input class="custom-input" id="custom-cond-nome" placeholder="Nome...">
+      <input type="color" class="custom-color" id="custom-cond-cor" value="#d4af37">
+      <button class="btn-custom-add" onclick="criarCustomCond()">＋</button>
+    </div>`;
+  body.innerHTML=html;
+}
+function toggleCondBox(id){condSet.has(id)?condSet.delete(id):condSet.add(id);renderCondBox();}
+function criarCustomCond(){
+  const nome=document.getElementById('custom-cond-nome').value.trim();
+  const cor=document.getElementById('custom-cond-cor').value;
+  if(!nome)return;
+  const id='cx_'+Date.now();
+  customConds.push({id,nome,cor});condSet.add(id);salvar();renderCondBox();
+}
+function confirmarConds(){
+  const c=combatentes.find(c=>c.id===condTargetId);
+  if(c){c.conds=[...condSet];renderPopupConds(c);}
+  fecharCondOverlay();salvar();render();
+}
+
+function abrirAdd(){
+  document.getElementById('add-nome').value='';
+  document.getElementById('add-ini').value='';
+  document.getElementById('add-hp').value='10';
+  document.getElementById('add-tipo').value='enemy';
+  document.getElementById('add-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('add-nome').focus(),80);
+}
+function fecharAdd(){document.getElementById('add-overlay').classList.remove('open');}
+function confirmarAdd(){
+  const nome=document.getElementById('add-nome').value.trim();
+  if(!nome){document.getElementById('add-nome').focus();return;}
+  const ini=parseInt(document.getElementById('add-ini').value)||0;
+  const hp=Math.max(1,parseInt(document.getElementById('add-hp').value)||10);
+  const tipo=document.getElementById('add-tipo').value;
+  combatentes.push({id:'c'+(idCtr++),nome,tipo,iniciativa:ini,des:0,hpAtual:hp,hpMax:hp,conds:[]});
+  fecharAdd();salvar();render();
+}
+
+function setupDrag(){
+  const panel=document.getElementById('panel');
+  const header=document.getElementById('panel-header');
+  let drag=false,ox=0,oy=0;
+  header.addEventListener('mousedown',e=>{drag=true;ox=e.clientX-panel.offsetLeft;oy=e.clientY-panel.offsetTop;e.preventDefault();});
+  document.addEventListener('mousemove',e=>{
+    if(!drag)return;
+    let nx=Math.max(0,Math.min(window.innerWidth-panel.offsetWidth,e.clientX-ox));
+    let ny=Math.max(0,Math.min(window.innerHeight-panel.offsetHeight,e.clientY-oy));
+    panel.style.left=nx+'px';panel.style.top=ny+'px';
+    if(popupId){const r=document.getElementById('row-'+popupId);if(r)posicionarPopup(r);}
+  });
+  document.addEventListener('mouseup',()=>{drag=false;});
+}
+
+function setupKeys(){
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){fecharPopup();fecharCondOverlay();fecharAdd();}
+    if(e.key==='Enter'&&document.getElementById('add-overlay').classList.contains('open'))confirmarAdd();
+  });
+  ['add-nome','add-ini','add-hp'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter')confirmarAdd();});
+  });
+  document.getElementById('cond-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('cond-overlay'))fecharCondOverlay();});
+  document.getElementById('add-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('add-overlay'))fecharAdd();});
+  document.addEventListener('click',e=>{
+    const popup=document.getElementById('popup');
+    const panel=document.getElementById('panel');
+    if(popup.classList.contains('open')&&!popup.contains(e.target)&&!panel.contains(e.target))fecharPopup();
+  });
+}
+
+function salvar(){try{localStorage.setItem('rpgTracker',JSON.stringify({combatentes,rodada,turno,idCtr,customConds}));}catch(e){}}
+function carregar(){try{const raw=localStorage.getItem('rpgTracker');if(!raw)return;const d=JSON.parse(raw);combatentes=d.combatentes||[];rodada=d.rodada||1;turno=d.turno??-1;idCtr=d.idCtr||1;customConds=d.customConds||[];}catch(e){}}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>

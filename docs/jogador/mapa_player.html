@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mapa — Mesa de RPG</title>
+<title>Mapa — Jogador</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -520,7 +520,7 @@ html, body {
 .btn-confirm:hover { background: rgba(212,175,55,.22); box-shadow: 0 0 12px var(--gold-dim); }
 
 /* ══ MODAL EDITAR TOKEN ══ */
-/*#modal-edit { }
+#modal-edit { }
 
 /* ══ GRID CONTROLS (flutuante) ══ */
 #grid-controls {
@@ -599,41 +599,20 @@ html, body {
   <button class="tb-btn active" id="tool-pan" onclick="setTool('pan')" title="Mover mapa">
     ✋<span class="tb-tooltip">MOVER</span>
   </button>
-  <button class="tb-btn" id="tool-token" onclick="setTool('token')" title="Adicionar token">
-    🪙<span class="tb-tooltip">TOKEN</span>
-  </button>
   <div class="tb-sep"></div>
-  <button class="tb-btn" id="btn-upload-map" onclick="document.getElementById('map-file-input').click()" title="Carregar mapa">
-    🖼️<span class="tb-tooltip">MAPA</span>
-  </button>
-  <button class="tb-btn" id="btn-grid" onclick="toggleGridControls()" title="Grade">
-    ▦<span class="tb-tooltip">GRADE</span>
-  </button>
   <button class="tb-btn" id="btn-center" onclick="centerMap()" title="Centralizar">
     ⊕<span class="tb-tooltip">CENTRAR</span>
   </button>
-  <div class="tb-sep"></div>
   <button class="tb-btn" id="btn-zoom-in" onclick="zoomBy(0.2)" title="Zoom in">
     ＋<span class="tb-tooltip">ZOOM +</span>
   </button>
   <button class="tb-btn" id="btn-zoom-out" onclick="zoomBy(-0.2)" title="Zoom out">
     －<span class="tb-tooltip">ZOOM −</span>
   </button>
-  <div class="tb-sep"></div>
-  <button class="tb-btn" id="btn-tokens-panel" onclick="toggleTokensPanel()" title="Painel de tokens">
-    👥<span class="tb-tooltip">TOKENS</span>
-  </button>
 </div>
 
-<!-- PAINEL LATERAL TOKENS -->
-<div id="tokens-panel">
-  <div id="tokens-panel-header">
-    <span>⚔️ TOKENS</span>
-    <button class="tb-btn" style="width:24px;height:24px;font-size:13px" onclick="toggleTokensPanel()">✕</button>
-  </div>
-  <div id="tokens-list"></div>
-  <button id="btn-add-token" onclick="abrirModalCriar()">＋ Adicionar token</button>
-</div>
+<!-- Painel de tokens oculto para jogador -->
+<div id="tokens-panel" style="display:none"></div>
 
 <!-- ZOOM INDICATOR -->
 <div id="zoom-indicator">100%</div>
@@ -815,15 +794,9 @@ document.getElementById('upload-zone').addEventListener('click', () => {
   document.getElementById('map-file-input').click();
 });
 
-// drag & drop de imagem diretamente no stage
+// drag & drop desabilitado para jogador
 document.addEventListener('dragover', e => e.preventDefault());
-document.addEventListener('drop', e => {
-  e.preventDefault();
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
-    loadMap(URL.createObjectURL(file));
-  }
-});
+document.addEventListener('drop', e => e.preventDefault());
 
 function loadMap(url) {
   mapImg.onload = () => {
@@ -1089,12 +1062,8 @@ stage.addEventListener('mousedown', e => {
   const tokenEl = e.target.closest('.token');
   if (tokenEl) return; // tratado pelo token
 
-  // Clique em ferramenta token → coloca token
-  if (state.tool === 'token') {
-    const worldPos = screenToWorld(e.clientX, e.clientY);
-    abrirModalCriar(worldPos.x, worldPos.y);
-    return;
-  }
+  // Jogador não pode adicionar tokens
+  if (state.tool === 'token') return;
 
   // Pan
   state.isPanning = true;
@@ -1147,6 +1116,11 @@ stage.addEventListener('wheel', e => {
 // TOKEN DRAG — MOUSE
 // ═══════════════════════════════════════════════
 function onTokenMouseDown(e, id) {
+  // Jogador só pode selecionar, não arrastar
+  e.stopPropagation();
+  selecionarToken(id);
+  return;
+  // código original abaixo (nunca executado):
   if (e.button !== 0) return;
   e.stopPropagation();
   selecionarToken(id);

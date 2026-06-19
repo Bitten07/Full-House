@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mesa de rpg — Entrar</title>
+<title>Mesa de RPG — Entrar</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -295,8 +295,8 @@ html, body {
     <!-- LOGO -->
     <div id="logo-area">
       <div id="logo-icon">⚔️</div>
-      <div id="logo-title">FULL HOUSE RPG</div>
-      <div id="logo-sub">Forjado em ecos &amp; de uma ruptura</div>
+      <div id="logo-title">MESA DE RPG</div>
+      <div id="logo-sub">Forjado em Arton &amp; além</div>
     </div>
 
     <!-- ABAS -->
@@ -521,142 +521,183 @@ document.getElementById('avatar-file').addEventListener('change', e => {
   reader.readAsDataURL(file);
 });
 
+const API = 'http://localhost:3000';
+
 // ═══════════════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════════════
-function fazerLogin() {
+async function fazerLogin() {
   const user  = document.getElementById('login-user').value.trim();
   const senha = document.getElementById('login-senha').value;
 
-  if (!user || !senha) { mostrarMsg('msg-login','error','Preencha todos os campos.'); return; }
+  if (!user || !senha) { mostrarMsg('msg-login', 'error', 'Preencha todos os campos.'); return; }
 
-  // Busca usuário no localStorage
-  const contas = JSON.parse(localStorage.getItem('rpgContas') || '[]');
-  const conta  = contas.find(c => (c.email === user || c.usuario === user) && c.senha === btoa(senha));
+  try {
+    const resposta = await fetch(`${API}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identificador: user, senha })
+    });
 
-  if (!conta) { mostrarMsg('msg-login','error','Usuário ou senha incorretos.'); return; }
+    const dados = await resposta.json();
 
-  // Salva sessão
-  localStorage.setItem('rpgSessao', JSON.stringify({ id: conta.id, nome: conta.nome, role: conta.role, avatar: conta.avatar }));
-  mostrarMsg('msg-login','success','✅ Bem-vindo de volta, ' + conta.nome + '!');
-  setTimeout(() => entrarNaMesa(conta), 900);
+    if (!resposta.ok) {
+      mostrarMsg('msg-login', 'error', dados.message || 'Erro ao fazer login.');
+      return;
+    }
+
+    localStorage.setItem('rpgToken',   dados.token);
+    localStorage.setItem('rpgUsuario', JSON.stringify(dados.usuario));
+
+    mostrarMsg('msg-login', 'success', `✅ Bem-vindo de volta, ${dados.usuario.nome}!`);
+    setTimeout(() => window.location.href = 'index.html', 900);
+
+  } catch (err) {
+    mostrarMsg('msg-login', 'error', 'Não foi possível conectar ao servidor.');
+  }
 }
 
 // ═══════════════════════════════════════════════
 // CADASTRO
 // ═══════════════════════════════════════════════
-function fazerCadastro() {
+async function fazerCadastro() {
   const nome  = document.getElementById('cad-nome').value.trim();
-  const user  = document.getElementById('cad-user').value.trim().replace('@','');
+  const user  = document.getElementById('cad-user').value.trim().replace('@', '');
   const email = document.getElementById('cad-email').value.trim();
   const senha = document.getElementById('cad-senha').value;
 
-  if (!nome || !user || !email || !senha) { mostrarMsg('msg-cadastro','error','Preencha todos os campos.'); return; }
-  if (senha.length < 6) { mostrarMsg('msg-cadastro','error','Senha muito curta (mín. 6 caracteres).'); return; }
-  if (!/\S+@\S+\.\S+/.test(email)) { mostrarMsg('msg-cadastro','error','Email inválido.'); return; }
+  if (!nome || !user || !email || !senha) { mostrarMsg('msg-cadastro', 'error', 'Preencha todos os campos.'); return; }
+  if (senha.length < 6) { mostrarMsg('msg-cadastro', 'error', 'Senha muito curta (mín. 6 caracteres).'); return; }
+  if (!/\S+@\S+\.\S+/.test(email)) { mostrarMsg('msg-cadastro', 'error', 'Email inválido.'); return; }
 
-  const contas = JSON.parse(localStorage.getItem('rpgContas') || '[]');
-  if (contas.find(c => c.email === email)) { mostrarMsg('msg-cadastro','error','Este email já está cadastrado.'); return; }
-  if (contas.find(c => c.usuario === user)) { mostrarMsg('msg-cadastro','error','Nome de usuário já existe.'); return; }
+  try {
+    const resposta = await fetch(`${API}/cadastro`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome,
+        usuario: user,
+        email,
+        senha,
+        role: roleAtual,
+        avatar: avatarDataUrl || null
+      })
+    });
 
-  const novaConta = {
-    id:      'u' + Date.now(),
-    nome, usuario: user, email,
-    senha:   btoa(senha),
-    role:    roleAtual,
-    avatar:  avatarDataUrl || null,
-    mesas:   [],
-    criadoEm: Date.now(),
-  };
-  contas.push(novaConta);
-  localStorage.setItem('rpgContas', JSON.stringify(contas));
-  localStorage.setItem('rpgSessao', JSON.stringify({ id: novaConta.id, nome, role: roleAtual, avatar: avatarDataUrl }));
-  mostrarMsg('msg-cadastro','success','✅ Conta criada! Bem-vindo, ' + nome + '!');
-  setTimeout(() => entrarNaMesa(novaConta), 900);
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+      mostrarMsg('msg-cadastro', 'error', dados.message || 'Erro ao cadastrar.');
+      return;
+    }
+
+    mostrarMsg('msg-cadastro', 'success', `✅ Conta criada! Bem-vindo, ${nome}!`);
+    // Após cadastro, redireciona para login
+    setTimeout(() => mudarAba('login'), 1200);
+
+  } catch (err) {
+    mostrarMsg('msg-cadastro', 'error', 'Não foi possível conectar ao servidor.');
+  }
 }
 
 // ═══════════════════════════════════════════════
-// VISITANTE
+// VISITANTE (separado do login real)
 // ═══════════════════════════════════════════════
 function entrarVisitante() {
   const nome = prompt('Como quer ser chamado?')?.trim() || 'Aventureiro';
-  localStorage.setItem('rpgSessao', JSON.stringify({ id: 'guest', nome, role: 'player', avatar: null, visitante: true }));
+  // Visitante não usa rpgToken — fica totalmente separado
+  localStorage.setItem('rpgVisitante', 'true');
+  localStorage.setItem('rpgUsuario', JSON.stringify({ nome, role: 'player', visitante: true }));
   window.location.href = 'index.html';
 }
 
 // ═══════════════════════════════════════════════
-// ENTRAR NA MESA
+// MESAS (ainda local, backend será integrado depois)
 // ═══════════════════════════════════════════════
-function entrarNaMesa(conta) {
-  // Mostra painel de mesas se houver mesas salvas
-  const mesas = conta.mesas || [];
-  if (mesas.length > 0) {
-    document.getElementById('form-login').classList.add('hidden');
-    document.getElementById('tab-bar').style.display = 'none';
-    const panel = document.getElementById('mesas-panel');
-    panel.classList.add('visible');
-    const lista = document.getElementById('mesas-lista');
-    lista.innerHTML = mesas.map(m => `
-      <div class="mesa-item" onclick="abrirMesa('${m.id}')">
-        <span class="mesa-emoji">${m.emoji || '🗺️'}</span>
-        <div class="mesa-info">
-          <div class="mesa-nome">${m.nome}</div>
-          <div class="mesa-meta">${m.jogadores || 0} jogadores · ${m.sistema || 'T20'}</div>
-        </div>
-        <span class="mesa-badge ${conta.role==='mestre'?'badge-mestre':'badge-player'}">${conta.role==='mestre'?'MESTRE':'JOGADOR'}</span>
-      </div>
-    `).join('');
-  } else {
-    window.location.href = 'index.html';
-  }
-}
-
 function abrirMesa(id) { window.location.href = 'index.html?mesa=' + id; }
+
 function novaMesa() {
   const nome = prompt('Nome da nova mesa:')?.trim();
   if (!nome) return;
-  const sessao = JSON.parse(localStorage.getItem('rpgSessao') || '{}');
-  const contas = JSON.parse(localStorage.getItem('rpgContas') || '[]');
-  const conta  = contas.find(c => c.id === sessao.id);
-  if (!conta) { window.location.href = 'index.html'; return; }
-  const mesa = { id: 'm'+Date.now(), nome, emoji:'🗺️', sistema:'T20', jogadores:1, criadaEm:Date.now() };
-  conta.mesas = conta.mesas || [];
-  conta.mesas.push(mesa);
-  localStorage.setItem('rpgContas', JSON.stringify(contas));
+  const mesa = { id: 'm' + Date.now(), nome, emoji: '🗺️', sistema: 'T20', jogadores: 1 };
+  const mesas = JSON.parse(localStorage.getItem('rpgMesas') || '[]');
+  mesas.push(mesa);
+  localStorage.setItem('rpgMesas', JSON.stringify(mesas));
   window.location.href = 'index.html?mesa=' + mesa.id;
 }
+
 function entrarPorCodigo() {
   const code = prompt('Digite o código de convite da mesa:')?.trim();
   if (code) window.location.href = 'index.html?codigo=' + code;
 }
 
 // ═══════════════════════════════════════════════
-// AUTO-LOGIN se já tem sessão
+// LOGOUT
 // ═══════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  const sessao = localStorage.getItem('rpgSessao');
-  if (sessao) {
+function logout() {
+  localStorage.removeItem('rpgToken');
+  localStorage.removeItem('rpgUsuario');
+  localStorage.removeItem('rpgVisitante');
+  window.location.href = 'login.html';
+}
+
+// ═══════════════════════════════════════════════
+// AUTO-LOGIN — verifica token ao carregar
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  const token    = localStorage.getItem('rpgToken');
+  const visitante = localStorage.getItem('rpgVisitante');
+
+  // Se já tem sessão válida, mostra opção de continuar
+  if (token) {
     try {
-      const s = JSON.parse(sessao);
-      // Mostra botão de continuar sessão
-      const footer = document.getElementById('auth-footer');
-      footer.innerHTML = `
-        <p style="margin-bottom:8px">Sessão ativa: <strong style="color:var(--gold)">${s.nome}</strong></p>
-        <button class="btn-auth" style="font-size:9px;padding:8px" onclick="window.location.href='index.html'">
-          ▶ CONTINUAR COMO ${s.nome.toUpperCase()}
-        </button>
-        <button class="btn-guest" style="margin-top:6px;font-size:9px" onclick="localStorage.removeItem('rpgSessao');location.reload()">
-          Trocar de conta
-        </button>`;
-    } catch(e) {}
+      const resposta = await fetch(`${API}/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (resposta.ok) {
+        const dados = await resposta.json();
+        localStorage.setItem('rpgUsuario', JSON.stringify(dados.usuario));
+        const u = dados.usuario;
+        const footer = document.getElementById('auth-footer');
+        footer.innerHTML = `
+          <p style="margin-bottom:8px">Sessão ativa: <strong style="color:var(--gold)">${u.nome}</strong></p>
+          <button class="btn-auth" style="font-size:9px;padding:8px" onclick="window.location.href='index.html'">
+            ▶ CONTINUAR COMO ${u.nome.toUpperCase()}
+          </button>
+          <button class="btn-guest" style="margin-top:6px;font-size:9px" onclick="logout()">
+            Trocar de conta
+          </button>`;
+        return; // não precisa configurar mais nada
+      } else {
+        // Token inválido — limpa
+        localStorage.removeItem('rpgToken');
+        localStorage.removeItem('rpgUsuario');
+      }
+    } catch (err) {
+      // Servidor offline — deixa tentar logar normalmente
+    }
+  } else if (visitante) {
+    // Visitante com sessão ativa
+    const u = JSON.parse(localStorage.getItem('rpgUsuario') || '{}');
+    const footer = document.getElementById('auth-footer');
+    footer.innerHTML = `
+      <p style="margin-bottom:8px">Visitante: <strong style="color:var(--gold)">${u.nome || 'Aventureiro'}</strong></p>
+      <button class="btn-auth" style="font-size:9px;padding:8px" onclick="window.location.href='index.html'">
+        ▶ CONTINUAR
+      </button>
+      <button class="btn-guest" style="margin-top:6px;font-size:9px" onclick="logout()">
+        Sair
+      </button>`;
+    return;
   }
 
   // Enter nos campos
-  ['login-user','login-senha'].forEach(id => {
-    document.getElementById(id)?.addEventListener('keydown', e => { if(e.key==='Enter') fazerLogin(); });
+  ['login-user', 'login-senha'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
   });
-  ['cad-nome','cad-user','cad-email','cad-senha'].forEach(id => {
-    document.getElementById(id)?.addEventListener('keydown', e => { if(e.key==='Enter') fazerCadastro(); });
+  ['cad-nome', 'cad-user', 'cad-email', 'cad-senha'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => { if (e.key === 'Enter') fazerCadastro(); });
   });
 });
 </script>
