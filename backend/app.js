@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 
 const authRoutes = require('./routes/auth.routes');
-const personagensRoutes = require('./routes/personagem.routes');
+const personagensRoutes = require('./routes/personagens.routes');
 
 const app = express();
 

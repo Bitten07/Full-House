@@ -2,9 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const supabase = require('../supabase');
 
-
-// Rota de cadastro
-app.post('/cadastro', async (req, res) => {
+async function cadastro(req, res) {
     try {
         const { nome, usuario, email, senha, role, avatar } = req.body;
 
@@ -28,10 +26,7 @@ app.post('/cadastro', async (req, res) => {
             });
         }
 
-        const usuarioFormatado = usuario
-            .trim()
-            .toLowerCase()
-            .replace('@', '');
+        const usuarioFormatado = usuario.trim().toLowerCase().replace('@', '');
 
         if (!/^[a-z0-9._-]{3,20}$/.test(usuarioFormatado)) {
             return res.status(400).json({
@@ -40,7 +35,6 @@ app.post('/cadastro', async (req, res) => {
         }
 
         const emailFormatado = email.trim().toLowerCase();
-
         const hash = await bcrypt.hash(senha, 10);
 
         const { data, error } = await supabase
@@ -80,14 +74,11 @@ app.post('/cadastro', async (req, res) => {
             error: error.message
         });
     }
-});
+}
 
-
-// Rota de login
-app.post('/login', async (req, res) => {
+async function login(req, res) {
     try {
         const { email, usuario, identificador, senha } = req.body;
-
         const login = identificador || email || usuario;
 
         if (!login || !senha) {
@@ -150,11 +141,9 @@ app.post('/login', async (req, res) => {
             error: error.message
         });
     }
-});
+}
 
-
-// Primeira rota protegida
-app.get('/me', autenticarToken, async (req, res) => {
+async function me(req, res) {
     const { data: usuario, error } = await supabase
         .from('usuarios')
         .select('id, nome, usuario, email, role, avatar, created_at')
@@ -168,4 +157,6 @@ app.get('/me', autenticarToken, async (req, res) => {
     }
 
     return res.status(200).json({ usuario });
-});
+}
+
+module.exports = { cadastro, login, me };
