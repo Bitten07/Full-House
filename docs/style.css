@@ -659,3 +659,15 @@ body, html {
 #combate-screen .resizer.nw { top: -5px;    left: -5px;   width: 15px; height: 15px; cursor: nw-resize; }
 #combate-screen .resizer.se { bottom: -5px; right: -5px;  width: 15px; height: 15px; cursor: se-resize; }
 #combate-screen .resizer.sw { bottom: -5px; left: -5px;   width: 15px; height: 15px; cursor: sw-resize; }
+
+/* ── Chip de usuário na sidebar ── */
+#usuario-chip > div {
+    white-space: nowrap;
+}
+/* Quando fechada, esconde texto do chip mas mantém avatar visível */
+#sidebar:not(:hover) #usuario-chip > div > div:nth-child(2),
+#sidebar:not(:hover) #usuario-chip > div > button {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+}

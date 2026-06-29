@@ -18,6 +18,10 @@
     <!-- SIDEBAR -->
     <nav id="sidebar">
         <div id="sidebar-icon">🛡️</div>
+
+        <!-- Chip do usuário logado — preenchido pelo guard de sessão -->
+        <div id="usuario-chip" style="padding: 0 5px; margin-bottom: 8px; opacity: 0; transition: opacity .3s;"></div>
+
         <ul class="menu-items">
             <li class="nav-button" onclick="abrirJanela('fichas')">
                 <span class="icon">📜</span>
@@ -139,8 +143,8 @@
             localStorage.setItem('rpgUsuario', JSON.stringify(dados.usuario));
             return dados.usuario;
         } catch (err) {
-            // Servidor offline — deixa entrar sem redirecionar
-            return null;
+            // Servidor offline — usa dados em cache
+            try { return JSON.parse(localStorage.getItem('rpgUsuario')); } catch { return null; }
         }
     }
 
@@ -151,19 +155,51 @@
         window.location.href = 'login.html';
     }
 
+    function renderizarChipUsuario(usuario) {
+        const chip = document.getElementById('usuario-chip');
+        if (!chip || !usuario) return;
+        const inicial = (usuario.nome || '?').charAt(0).toUpperCase();
+        const avatar = usuario.avatar
+            ? `<img src="${usuario.avatar}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;">`
+            : `<span style="width:26px;height:26px;border-radius:50%;background:rgba(212,175,55,.2);display:flex;align-items:center;justify-content:center;font-size:13px;color:#d4af37;flex-shrink:0;">${inicial}</span>`;
+        chip.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(212,175,55,.05);border:1px solid rgba(212,175,55,.12);border-radius:10px;overflow:hidden;">
+                ${avatar}
+                <div style="flex:1;min-width:0;overflow:hidden;">
+                    <div style="font-family:'Cinzel',serif;font-size:10px;color:#e8d5a3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${usuario.nome}</div>
+                    <div style="font-size:8px;letter-spacing:1px;color:#d4af37;margin-top:1px;">MESTRE</div>
+                </div>
+                <button onclick="logout()" title="Sair" style="background:none;border:none;color:rgba(212,175,55,.35);cursor:pointer;font-size:15px;padding:0;flex-shrink:0;transition:color .2s;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='rgba(212,175,55,.35)'">⏻</button>
+            </div>`;
+        chip.style.opacity = '1';
+    }
+
     // Guard: roda ao carregar a página
     (async () => {
         const token     = localStorage.getItem('rpgToken');
         const visitante = localStorage.getItem('rpgVisitante');
 
-        if (visitante) return; // visitante entra direto
+        if (visitante) {
+            // Visitante — mostra nome genérico sem badge de role
+            const u = JSON.parse(localStorage.getItem('rpgUsuario') || '{}');
+            renderizarChipUsuario({ nome: u.nome || 'Visitante', avatar: null });
+            return;
+        }
 
         if (!token) {
             window.location.href = 'login.html';
             return;
         }
 
-        await buscarUsuarioLogado();
+        const usuario = await buscarUsuarioLogado();
+
+        // Jogadores não devem estar aqui — manda pro index_player
+        if (usuario && usuario.role === 'player') {
+            window.location.href = 'index_player.html';
+            return;
+        }
+
+        if (usuario) renderizarChipUsuario(usuario);
     })();
     </script>
 </body>

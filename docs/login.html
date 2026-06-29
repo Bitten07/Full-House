@@ -550,7 +550,8 @@ async function fazerLogin() {
     localStorage.setItem('rpgUsuario', JSON.stringify(dados.usuario));
 
     mostrarMsg('msg-login', 'success', `✅ Bem-vindo de volta, ${dados.usuario.nome}!`);
-    setTimeout(() => window.location.href = 'index.html', 900);
+    const destino = dados.usuario.role === 'mestre' ? 'index.html' : 'index_player.html';
+    setTimeout(() => window.location.href = destino, 900);
 
   } catch (err) {
     mostrarMsg('msg-login', 'error', 'Não foi possível conectar ao servidor.');
@@ -659,10 +660,11 @@ window.addEventListener('DOMContentLoaded', async () => {
         const dados = await resposta.json();
         localStorage.setItem('rpgUsuario', JSON.stringify(dados.usuario));
         const u = dados.usuario;
+        const dest = u.role === 'mestre' ? 'index.html' : 'index_player.html';
         const footer = document.getElementById('auth-footer');
         footer.innerHTML = `
           <p style="margin-bottom:8px">Sessão ativa: <strong style="color:var(--gold)">${u.nome}</strong></p>
-          <button class="btn-auth" style="font-size:9px;padding:8px" onclick="window.location.href='index.html'">
+          <button class="btn-auth" style="font-size:9px;padding:8px" onclick="window.location.href='${dest}'">
             ▶ CONTINUAR COMO ${u.nome.toUpperCase()}
           </button>
           <button class="btn-guest" style="margin-top:6px;font-size:9px" onclick="logout()">
